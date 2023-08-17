@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
+	<flow name="addToCartFlow" doc:id="d15114fa-93b6-41c2-8d49-d7fc7ec500c8" >
+		<choice doc:name="cheking either customerId or email present in the body or not?" doc:id="8ed9e90b-2e6b-42f4-a0bc-f8050817c447" >
+			<when expression="#[(isEmpty(payload.customerId) and isEmpty(payload.email)) == true]">
+				<raise-error doc:name="ERR:CUSTOMER_ID_OR_EMAIL_NOT_PRESENT" doc:id="0e8858c1-93c4-41f7-8b10-34d8329d0ac1" type="ERR:CUSTOMER_ID_OR_EMAIL_NOT_PRESENT" description="Please specify customerId for existing user and email for new user in the body" />
+			</when>
+			<otherwise >
+				<logger level="INFO" doc:name="customerId or email Present" doc:id="22267c8e-7a96-4a90-b82f-c71be40477d4" message="Either customerId or email is present"/>
+			</otherwise>
+		</choice>
+		<choice doc:name="checking if email is given?" doc:id="0a2237d1-d11b-4528-90bd-b792dca975fa" >
+			<when expression="#[!isEmpty(payload.email)]">
+				<validation:is-email doc:name="Is email" doc:id="03a83c77-1f81-48f2-9c17-c044feb5c0ad" config-ref="Validation_Config" email="#[payload.email]" message='#["Email-Id  is not valid, Please Provide correct email-id"]'>
+					<error-mapping sourceType="VALIDATION:INVALID_EMAIL" targetType="ERR:INVALID_EMAIL" />
+				</validation:is-email>
+				<flow-ref doc:name="fetchAllCustomers" doc:id="b33937a0-b3b2-4ce2-b7d9-9380fc1b8436" name="fetchAllCustomers" />
+			</when>
+			<otherwise >
+				<logger level="INFO" doc:name="Logger" doc:id="a36d94bf-e337-4fcf-bdac-6022617a856c" message="continue"/>
+			</otherwise>
+		</choice>
+		<ee:transform doc:name="Transforming the request payload" doc:id="dd37a125-11db-4d07-9902-0d1f8cb161c3" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload.products.productTitle
+]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="addTocartRequest" ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<http:request method="GET" doc:name="Fetch All Products" doc:id="31454825-d384-46e7-bb3f-b22b7f20561d" config-ref="HTTP_Request_configuration_pro_customerPortal" path="/productDetails" target="products">
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	client_id:p('secure::pro_cp.client_id'),
+	client_secret:p('secure::pro_cp.client_secret')
+}]]]></http:headers>
+		</http:request>
+		<foreach doc:name="For Each" doc:id="bb4788c8-221a-4d58-a496-79cb0c355b5e" collection="#[payload]">
+			<choice doc:name="Checking Given ProductTtile is Correct or Not?" doc:id="ed1b6957-ec57-42a3-a6b5-7009744ba3ad" >
+				<when expression="#[vars.products.Product_Title contains payload]">
+					<logger level="INFO" doc:name="Correct Product" doc:id="0951f221-89b4-4ea6-b1e5-d922e52f5f22" message="ProductName is Correct"/>
+				</when>
+				<otherwise >
+					<raise-error doc:name="ERR:WRONG_PRODUCT_TITLE" doc:id="774b6851-2eb6-4e24-8217-5604cb9432c2" type="ERR:WRONG_PRODUCT_TITLE" description="Please Provide Correct ProductTitle"/>
+				</otherwise>
+			</choice>
+		</foreach>
+		<try doc:name="Try" doc:id="ab0cfcfe-ffab-4327-b60e-82cc1564de39" >
+			<http:request method="POST" doc:name="Add Items In cart" doc:id="bacf183d-7e7e-447d-93e6-c93f1a4d6645" config-ref="HTTP_Request_configuration_pro_customerPortal" path="/pro-addToCart">
+				<http:body><![CDATA[#[vars.addTocartRequest]]]></http:body>
+				<http:headers><![CDATA[#[output application/java
+---
+{
+	client_id:p('secure::pro_cp.client_id'),
+	client_secret:p('secure::pro_cp.client_secret')
+}]]]></http:headers>
+			</http:request>
+			<error-handler >
+				<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="b849be7b-027b-4c35-88e6-8ae16cdcae6b" >
+					<ee:transform doc:name="Error Message" doc:id="a6ae6a14-3fab-4346-a837-15f265f4b5f0" >
+						<ee:message >
+							<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+error.muleMessage.payload]]></ee:set-payload>
+						</ee:message>
+						<ee:variables >
+							<ee:set-variable variableName="httpStatus" ><![CDATA[error.muleMessage.typedAttributes.statusCode]]></ee:set-variable>
+						</ee:variables>
+					</ee:transform>
+				</on-error-propagate>
+			</error-handler>
+		</try>
+		<ee:transform doc:name="response" doc:id="9e919b83-a1e0-4aa5-9502-cc944dbbd4ac" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="fetchAllCustomers" doc:id="1a7dc280-2176-4159-87c1-e6717f973a68" >
+		<set-variable value="#[[]]" doc:name="customers" doc:id="65ebfaf3-7d0e-4733-92e8-fbcb25768ff2" variableName="customers"/>
+		<foreach doc:name="For Each" doc:id="2fcbeccf-4ced-4344-9f28-b3f3c558a307" collection='#[["Kolkata","Bangalore","Hyderabad","Mumbai"]]'>
+			<http:request method="GET" doc:name="Get customers from Local DB" doc:id="2d8d73f5-e529-4c44-8f63-3ad9cc550ace" config-ref="HTTP_Request_configuration_sys_cp_loc" path="customers/{location}">
+			<http:headers><![CDATA[#[output application/java
+---
+{
+	"client_id": p('secure::loc.client_id'),
+	"client_secret": p('secure::loc.client_secret')
+}]]]></http:headers>
+			<http:uri-params><![CDATA[#[output application/json
+---
+{
+	location : payload
+}]]]></http:uri-params>
+		</http:request>
+			<set-variable value="#[output application/json&#10;---&#10;vars.customers  ++ (payload map ((item, index) -&gt; (item.emailId) ))]" doc:name="customers" doc:id="53483f87-b45e-4b07-bfc0-6dc07395e67c" variableName="customers" />
+		</foreach>
+		<choice doc:name="checking existing user?" doc:id="110d2986-17e9-42b0-98ba-ed0d27af5734">
+			<when expression="#[vars.customers contains payload.email]">
+				<raise-error doc:name="ERR:EXISTING_USER" doc:id="605c2d46-d661-445e-8c9a-a7341586be52" type="ERR:EXISTING_USER" description="You are an existing user Please specify your customerId"/>
+			</when>
+			<otherwise >
+				<logger level="INFO" doc:name="Logger" doc:id="890ce71b-cf05-4d0c-98d7-42a78813671a" message="Continue..."/>
+			</otherwise>
+		</choice>
+	</flow>
+</mule>

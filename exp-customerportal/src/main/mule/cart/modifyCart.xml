@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="modifyCartFlow" doc:id="60b4543a-08d9-4be7-9540-298056baa8e8" >
+		<choice doc:name="cheking either customerId or email present in the body or not?" doc:id="53c3a5e3-5565-4342-bd30-7e40f4710f96" >
+			<when expression="#[(isEmpty(payload.customerId) and isEmpty(payload.email)) == true]">
+				<raise-error doc:name="ERR:CUSTOMER_ID_OR_EMAIL_NOT_PRESENT" doc:id="a81ed6ad-ecf9-4e8e-8206-f71050d4b387" type="ERR:CUSTOMER_ID_OR_EMAIL_NOT_PRESENT" description="Please specify customerId for existing user and email for new user in the body"/>
+			</when>
+			<otherwise >
+				<try doc:name="Try" doc:id="ca624d31-38fc-4bba-a9a5-75e0bc6a1e96" >
+					<http:request method="PUT" doc:name="Modify Items In cart" doc:id="9a9cf9b9-d0cd-44f0-b360-1fe2ae9aba47" config-ref="HTTP_Request_configuration_pro_customerPortal" path="/pro-modifyCart" >
+						<http:headers ><![CDATA[#[output application/java
+---
+{
+	client_id:p('secure::pro_cp.client_id'),
+	client_secret:p('secure::pro_cp.client_secret')
+}]]]></http:headers>
+					</http:request>
+					<error-handler >
+						<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="ff873805-3249-4e4e-bf21-e0343f2fa30b" >
+							<ee:transform doc:name="Error Message" doc:id="1bf5bb53-de79-47c1-8246-976de74741e0" >
+								<ee:message >
+									<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+error.muleMessage.payload]]></ee:set-payload>
+								</ee:message>
+								<ee:variables >
+									<ee:set-variable variableName="httpStatus" ><![CDATA[error.muleMessage.typedAttributes.statusCode]]></ee:set-variable>
+								</ee:variables>
+							</ee:transform>
+						</on-error-propagate>
+					</error-handler>
+				</try>
+			</otherwise>
+		</choice>
+		<ee:transform doc:name="response" doc:id="230ab4d2-bbb3-44af-aa4f-2188186c1ad3" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

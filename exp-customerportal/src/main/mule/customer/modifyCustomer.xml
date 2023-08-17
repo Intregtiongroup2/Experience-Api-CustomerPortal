@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
+	<flow name="modifyCustomerFlow" doc:id="423dd92f-4138-4331-b2dd-1041fb8cb696" >
+		<choice doc:name="Choice" doc:id="73b44b09-2088-4a77-9804-2a44e98fff1c" >
+			<when expression="#[(!isEmpty(payload.phoneNumber) or !isEmpty(payload.address) or !isEmpty(payload.pincode) or !isEmpty(payload.cardDetails))]">
+				<ee:transform doc:name="Incoming Payload" doc:id="677db17a-e930-446b-823e-cf098095ee0a" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	((if ( !isEmpty(payload.address) ) {
+		"address": payload.address
+	}
+else{
+	})),
+	(if ( !isEmpty(payload.phoneNumber) and matches(payload.phoneNumber,"^[0-9]*") ) {
+		"phoneNumber": payload.phoneNumber
+	}
+else if ( isEmpty(payload.phoneNumber) ) {
+	}
+else{
+		"error": "wrong pattern"
+	}),
+	(if ( !isEmpty(payload.pincode) and matches(payload.pincode,"^[0-9]*") ) {
+		"pincode": payload.pincode
+	}
+else if ( isEmpty(payload.pincode) ) {
+	}
+else{
+		"error": "wrong pattern"
+	}),
+	((if ( !isEmpty(payload.cardDetails) ) {
+		"cardDetails": payload.cardDetails
+	}
+else{
+	}))
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="extraFields" ><![CDATA[%dw 2.0
+output application/json
+---
+(keysOf(payload)) - "phoneNumber" as Key - "cardDetails" as Key - "address" as Key - "pincode" as Key]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+				<choice doc:name="Choice" doc:id="1ffe008c-f59c-4af2-b597-1aaa7752b381" >
+					<when expression="#[isEmpty(payload.error)]">
+						<validation:is-true doc:name="Is true" doc:id="fa4c571a-8a25-4a58-8f0e-fa1663665acb" config-ref="Validation_Config" expression="#[sizeOf(vars.extraFields)==0]" message="extra fields present which are not allowed Only phoneNumber,address,pincode and new card Details can be modified">
+					<error-mapping sourceType="VALIDATION:INVALID_BOOLEAN" targetType="ERR:FIELDS_NOT_ALLOWED" />
+				</validation:is-true>
+					</when>
+					<otherwise >
+						<raise-error doc:name="ERR:INVALID_FIELD_PATTERN" doc:id="63ad79eb-6515-44d8-9165-020da5a634ee" type="ERR:INVALID_FIELD_PATTERN" description="Please provide the required fields in correct pattern"/>
+					</otherwise>
+				</choice>
+				<http:request method="PUT" doc:name="Update Existing Customer Details" doc:id="1ee38eee-5238-48e7-a23e-cf702ec34c2f" config-ref="HTTP_Request_configuration_pro_customerPortal" path="/modifyCustomerDetails">
+					<http:headers><![CDATA[#[output application/java
+---
+{
+	client_id:p('secure::pro_cp.client_id'),
+	client_secret:p('secure::pro_cp.client_secret')
+}]]]></http:headers>
+					<http:query-params><![CDATA[#[{
+	customerId: attributes.queryParams.customerId
+}]]]></http:query-params>
+				</http:request>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="No Update" doc:id="a41b3372-ecd2-4d84-b309-9eab053f5a20" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "No update"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
+		</choice>
+	</flow>
+</mule>

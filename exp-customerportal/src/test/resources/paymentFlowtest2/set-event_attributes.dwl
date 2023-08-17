@@ -1,0 +1,31 @@
+{
+  "headers": {
+    "client_id": "0747d9c2cdba4796b285b7f0304b4d90",
+    "client_secret": "d021f7140a6746A1Bb5435fB8BB38198",
+    "content-type": "application/json",
+    "authorization": "Bearer 1StMWg3ZIUyzWedr0f6R6YB1USCCkKicWeBL48yILY7ubxyM8V0x45OB88YvhR2PM-fz_RViYs0Bpz_vmVoWHw",
+    "user-agent": "PostmanRuntime/7.32.3",
+    "accept": "*/*",
+    "postman-token": "fe6538c7-46bd-4cc7-aaef-85f57fa4ebbc",
+    "host": "localhost:8082",
+    "accept-encoding": "gzip, deflate, br",
+    "connection": "keep-alive",
+    "content-length": "314"
+  },
+  "clientCertificate": null,
+  "method": "POST",
+  "scheme": "https",
+  "queryParams": {},
+  "requestUri": "/api/payment",
+  "queryString": "",
+  "version": "HTTP/1.1",
+  "maskedRequestPath": "/payment",
+  "listenerPath": "/api/*",
+  "relativePath": "/api/payment",
+  "localAddress": "/127.0.0.1:8082",
+  "uriParams": {},
+  "rawRequestUri": "/api/payment",
+  "rawRequestPath": "/api/payment",
+  "remoteAddress": "/127.0.0.1:55697",
+  "requestPath": "/api/payment"
+}

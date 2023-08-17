@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<flow name="closeComplaintFlow" doc:id="7ae35bb2-485b-4b8b-8d00-9bce9380cfca" >
+		<http:request method="PUT" doc:name="modify complaint status" doc:id="3a205f6d-1be4-4f9e-b42d-ef77b442a2f6" config-ref="HTTP_Request_configuration_pro_customerPortal" path="/pro-close_complaint" >
+			<http:body ><![CDATA[#[%dw 2.0
+output application/json
+---
+{
+    "status":"Closed"
+}]]]></http:body>
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"client_id":p('secure::pro_cp.client_id'),
+	"client_secret":p('secure::pro_cp.client_secret')
+}]]]></http:headers>
+			<http:query-params ><![CDATA[#[output application/java
+---
+{
+	"complaintId" : attributes.queryParams.complaintId,
+	"action": attributes.queryParams.action 
+}]]]></http:query-params>
+		</http:request>
+		<ee:transform doc:name="show response" doc:id="17364175-606c-44ac-8dab-54b2c691d309" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="true" doc:name="ANY" doc:id="c957ff9a-dc35-42bb-a5b5-860ddb8b7cb4" type="ANY" >
+				<logger level="INFO" doc:name="Error" doc:id="68867477-9a14-4052-a321-5cf9dd26acde" message="ANY error occoured" />
+				<ee:transform doc:name="Error Message" doc:id="eb6f3437-81ba-49f8-b9fa-1721e54c879e" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+error.muleMessage.payload]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[error.muleMessage.typedAttributes.statusCode]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-continue>
+		</error-handler>
+	</flow>
+</mule>

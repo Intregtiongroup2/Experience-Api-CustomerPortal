@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="get_ProductsFlow" doc:id="8117d180-8d28-411a-a118-80ed99b28080" >
+		<choice doc:name="Choice" doc:id="5d4579b7-3e51-4700-9c28-1ec30d8bdaa5" >
+			<when expression="#[isEmpty(attributes.uriParams.productTitle)== true]">
+				<try doc:name="Try" doc:id="6c86730e-8ab5-427f-97e8-affa653cf042">
+			<http:request method="GET" doc:name="Fetch All Products" doc:id="26e2e80d-559d-4c6b-a0bc-dee18b0e77d9" config-ref="HTTP_Request_configuration_pro_customerPortal" path="/productDetails">
+			<http:headers><![CDATA[#[output application/java
+---
+{
+	client_id:p('secure::pro_cp.client_id'),
+	client_secret:p('secure::pro_cp.client_secret')
+}]]]></http:headers>
+		</http:request>
+			<error-handler>
+				<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="2196ae82-8862-4f83-8627-28aa88a5f0cc">
+					<ee:transform doc:name="Error Message" doc:id="cf7d1624-d544-4075-9a21-abb0b02c09d8">
+						<ee:message>
+							<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+error.muleMessage.payload]]></ee:set-payload>
+						</ee:message>
+						<ee:variables>
+							<ee:set-variable variableName="httpStatus"><![CDATA[error.muleMessage.typedAttributes.statusCode]]></ee:set-variable>
+						</ee:variables>
+					</ee:transform>
+				</on-error-propagate>
+			</error-handler>
+		</try>
+			</when>
+			<otherwise >
+				<try doc:name="Try" doc:id="2947fcc2-c111-4e60-b10f-5e64c2ac7b61" >
+					<http:request method="GET" doc:name="Fetch Specific Product Details" doc:id="910d2673-9c17-4cf9-9917-5dad2bf62340" config-ref="HTTP_Request_configuration_pro_customerPortal" path="/productDetails" >
+						<http:headers ><![CDATA[#[output application/java
+---
+{
+	client_id:p('secure::pro_cp.client_id'),
+	client_secret:p('secure::pro_cp.client_secret')
+}]]]></http:headers>
+						<http:query-params ><![CDATA[#[output application/json
+---
+{
+	productTitle: attributes.uriParams.productTitle
+}]]]></http:query-params>
+					</http:request>
+					<error-handler >
+						<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="fb0161ee-3b3e-48df-a0a0-6250c64fb6d2" >
+							<ee:transform doc:name="Error Message" doc:id="11280f45-8028-4724-aaae-b1cc6053c605" >
+								<ee:message >
+									<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+error.muleMessage.payload]]></ee:set-payload>
+								</ee:message>
+								<ee:variables >
+									<ee:set-variable variableName="httpStatus" ><![CDATA[error.muleMessage.typedAttributes.statusCode]]></ee:set-variable>
+								</ee:variables>
+							</ee:transform>
+						</on-error-propagate>
+					</error-handler>
+				</try>
+			</otherwise>
+		</choice>
+		<ee:transform doc:name="Response" doc:id="ed390a65-92f7-47b6-9657-5dc8942601f9" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

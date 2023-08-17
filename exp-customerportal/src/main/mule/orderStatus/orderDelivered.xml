@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<flow name="orderDeliveredFlow" doc:id="f0481b72-3064-411d-86d6-30c58f1dd769" >
+		<http:request method="PUT" doc:name="update Order Status " doc:id="c56ec2b9-7523-410c-99ac-a4b22ae6852d" config-ref="HTTP_Request_configuration_pro_customerPortal" path="/pro-orderDelivered">
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	client_id:p('secure::pro_cp.client_id'),
+	client_secret:p('secure::pro_cp.client_secret')
+}]]]></http:headers>
+			<http:query-params ><![CDATA[#[output application/java
+---
+{
+	orderId : attributes.queryParams.orderId
+}]]]></http:query-params>
+		</http:request>
+	</flow>
+</mule>

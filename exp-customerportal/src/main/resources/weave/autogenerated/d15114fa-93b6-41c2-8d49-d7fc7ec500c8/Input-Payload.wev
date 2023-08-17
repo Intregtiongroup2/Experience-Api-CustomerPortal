@@ -1,0 +1,10 @@
+%dw 2.0
+
+type auto_d15114fa_93b6_41c2_8d49_d7fc7ec500c8_Input_Payload = {
+  customerId?: String, 
+  location: String, 
+  email?: String, 
+  products: Array<{    productTitle: String,     quantity: Number,     _?: Any  }>, 
+  _?: Any
+}
+

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
+	<flow name="cartDetailsFlow" doc:id="912adbbf-9fbe-44cf-8bec-d92de7178ad8" >
+		<choice doc:name="checking customerId or email present?" doc:id="9b1c0cec-fd75-4b58-8255-4c784c37ae36" >
+			<when expression="#[!isEmpty(attributes.queryParams.customerId) == true]">
+				<try doc:name="Try" doc:id="dd854c71-cdfa-4b2b-900d-9daca7237359" >
+					<http:request method="GET" doc:name="fetch Items from cart based on customerId" doc:id="ad2b1148-d94a-4afc-b10c-18b450f4b4e9" config-ref="HTTP_Request_configuration_pro_customerPortal" path="/pro-cartDetails">
+					<http:headers><![CDATA[#[output application/java
+---
+{
+	client_id:p('secure::pro_cp.client_id'),
+	client_secret:p('secure::pro_cp.client_secret')
+}]]]></http:headers>
+					<http:query-params><![CDATA[#[output application/json
+---
+{
+	customerId: attributes.queryParams.customerId
+}]]]></http:query-params>
+				</http:request>
+					<error-handler >
+						<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="e68ddd1d-0cb2-4461-8579-cf0c4c5865bc" >
+							<ee:transform doc:name="Error Message" doc:id="3f417529-0e8e-433f-a405-1cc21bc4d715" >
+								<ee:message >
+									<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+error.muleMessage.payload]]></ee:set-payload>
+								</ee:message>
+								<ee:variables >
+									<ee:set-variable variableName="httpStatus" ><![CDATA[error.muleMessage.typedAttributes.statusCode]]></ee:set-variable>
+								</ee:variables>
+							</ee:transform>
+						</on-error-propagate>
+					</error-handler>
+				</try>
+			</when>
+			<when expression="#[!isEmpty(attributes.queryParams.email) == true]">
+				<validation:is-email doc:name="Is email" doc:id="40a5748e-ab5a-4777-b9ec-636c661bdc26" config-ref="Validation_Config" email="#[attributes.queryParams.email]" message='#["Email-Id  is not valid, Please Provide correct email-id"]' >
+					<error-mapping sourceType="VALIDATION:INVALID_EMAIL" targetType="ERR:INVALID_EMAIL" />
+				</validation:is-email>
+				<try doc:name="Try" doc:id="75fe4802-6baa-45df-9cec-28f4434d8882" >
+					<http:request method="GET" doc:name="fetch Items from cart based on email" doc:id="37eadc9f-cbe5-46c3-8bfb-4faf5e9ebed3" config-ref="HTTP_Request_configuration_pro_customerPortal" path="/pro-cartDetails">
+					<http:headers><![CDATA[#[output application/java
+---
+{
+	client_id:p('secure::pro_cp.client_id'),
+	client_secret:p('secure::pro_cp.client_secret')
+}]]]></http:headers>
+					<http:query-params><![CDATA[#[output application/json
+---
+{
+	emailId: attributes.queryParams.email
+}]]]></http:query-params>
+				</http:request>
+					<error-handler >
+						<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="6703b95e-05a2-47ad-a50e-508261ff6c17" >
+							<ee:transform doc:name="Error Message" doc:id="8709b72f-2696-45ca-b1a4-885a112e4a3b" >
+								<ee:message >
+									<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+error.muleMessage.payload]]></ee:set-payload>
+								</ee:message>
+								<ee:variables >
+									<ee:set-variable variableName="httpStatus" ><![CDATA[error.muleMessage.typedAttributes.statusCode]]></ee:set-variable>
+								</ee:variables>
+							</ee:transform>
+						</on-error-propagate>
+					</error-handler>
+				</try>
+			</when>
+			<otherwise >
+				<raise-error doc:name="ERR:QEURY_PARAM_NOT_FOUND" doc:id="768b3193-6c32-4e50-a460-eb505cee1bae" type="ERR:QEURY_PARAM_NOT_FOUND" description="Please Specify customerId for existing user and email for new user in query parameter"/>
+			</otherwise>
+		</choice>
+		<ee:transform doc:name="response" doc:id="cc034c5a-9144-4b79-917b-da3c03dc3c5c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

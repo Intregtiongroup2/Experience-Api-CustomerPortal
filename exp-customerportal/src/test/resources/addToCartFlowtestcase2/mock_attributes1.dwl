@@ -1,0 +1,32 @@
+{
+  "headers": {
+    "client_id": "0747d9c2cdba4796b285b7f0304b4d90",
+    "client_secret": "d021f7140a6746A1Bb5435fB8BB38198",
+    "content-type": "application/json",
+    "authorization": "Bearer uX9GEpM0wklPnlk29JQbX3258hN3OaOQDQSt5jJxlCBRs5-16TrlBxqwXKMiTAkb8X8BXe8v0-_VOQbcRdAklA",
+    "user-agent": "PostmanRuntime/7.32.3",
+    "accept": "*/*",
+    "cache-control": "no-cache",
+    "postman-token": "be89b000-efa6-4560-9b1c-644ef92ba6a3",
+    "host": "localhost:8082",
+    "accept-encoding": "gzip, deflate, br",
+    "connection": "keep-alive",
+    "content-length": "233"
+  },
+  "clientCertificate": null,
+  "method": "POST",
+  "scheme": "https",
+  "queryParams": {},
+  "requestUri": "/api/addToCart",
+  "queryString": "",
+  "version": "HTTP/1.1",
+  "maskedRequestPath": "/addToCart",
+  "listenerPath": "/api/*",
+  "relativePath": "/api/addToCart",
+  "localAddress": "/127.0.0.1:8082",
+  "uriParams": {},
+  "rawRequestUri": "/api/addToCart",
+  "rawRequestPath": "/api/addToCart",
+  "remoteAddress": "/127.0.0.1:65283",
+  "requestPath": "/api/addToCart"
+}

@@ -1,0 +1,21 @@
+pro_cp:
+  host: "![XnllYEwBE1SaNKuxQtpk8Z+Gpvyt1e7kWTPdfoIcLZLiBJjy04ka+lToRBSRdxjR]"
+  protocol: "![IMgZ5Gx+3EaQqSOfM6c/ww==]"
+  timeout: "![Aq+pSSkA8ytcO9ulkSdJug==]"
+  bufferSize: "![4lZZVwSRhGrpE6ck405pRw==]"
+  client_id: "![mN1xjYoJRrCpmo45GSanHRcPcjFQTF5qtb7KgILvQzCIK+FqCGO+ItN3r3q1Ga/n]"
+  client_secret: "![N7ZXEjZSMCE1NLex9iUyRYqxBKnN8fvSg2y6rKi/knzw46usdKFzsqIRd9QYKbw4]"
+  
+loc:
+  host: "![nrLAfmwzIuatyk98LrjetCXLoijd+h7L2PczhIPsSmY=]"
+  protocol: "![IMgZ5Gx+3EaQqSOfM6c/ww==]"
+  timeout: "![Aq+pSSkA8ytcO9ulkSdJug==]"
+  bufferSize: "![4lZZVwSRhGrpE6ck405pRw==]"
+  client_id: "![NibqQ7ox49w3p+BsgYvQLZW0RSJvHQfGc4D3VwTgVPlqEkzb06y4gmoHiS2PJVJx]"
+  client_secret: "![hTN4SvVdf4WF8S0g/PqJtbH0z9zmEAAXRrF9ZUXlk5Alb84TgvUSILV6hogfr6mr]"
+    
+tls:
+  keyPass: "![/XsR0czN/d1IcT4ItU+IRA==]"
+  pass: "![/XsR0czN/d1IcT4ItU+IRA==]"
+
+  

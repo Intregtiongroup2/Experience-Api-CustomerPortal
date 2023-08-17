@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="trackComplaintFlow" doc:id="f2eca19d-1a8a-4fd2-842c-c270369880f9" >
+		<http:request method="GET" doc:name="fetch complaintDetails" doc:id="00e9a701-dd0b-4aea-b588-5fc12bd60bc2" config-ref="HTTP_Request_configuration_pro_customerPortal" path="/pro-track_complaint" >
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"client_id":p('secure::pro_cp.client_id'),
+	"client_secret":p('secure::pro_cp.client_secret')
+}]]]></http:headers>
+			<http:query-params ><![CDATA[#[output application/java
+---
+{
+	"complaintId" : attributes.queryParams.complaintId
+}]]]></http:query-params>
+		</http:request>
+		<ee:transform doc:name="show response" doc:id="358079b9-0e57-4d54-b77d-29879e9e56de" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="true" doc:name="ANY" doc:id="c87d4013-585d-426b-897a-71396bc81017" type="ANY" >
+				<logger level="INFO" doc:name="Error" doc:id="770dfbe7-c921-4d19-85dd-ccd499df45d1" message="ANY error occoured" />
+				<ee:transform doc:name="Error Message" doc:id="9a5754f9-a603-4caa-8983-f9cd2b6d6627" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+error.muleMessage.payload]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[error.muleMessage.typedAttributes.statusCode]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-continue>
+		</error-handler>
+	</flow>
+</mule>

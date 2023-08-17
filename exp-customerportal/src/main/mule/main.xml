@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd ">
+
+	<flow name="get:\productDetails:exp-customerportal-config">
+		<flow-ref doc:name="get_ProductsFlow" doc:id="0fb0c8b2-5c41-4583-bec1-bc1553ba9a8f" name="get_ProductsFlow" />
+	</flow>
+	<flow name="get:\productDetails\(productTitle):exp-customerportal-config">
+		<flow-ref doc:name="get_ProductsFlow" doc:id="796562b6-1d7f-40fa-b965-5db063392d73" name="get_ProductsFlow" />
+	</flow>
+	<flow name="get:\cartDetails:exp-customerportal-config">
+		<flow-ref doc:name="cartDetailsFlow" doc:id="8771f51b-2af7-4815-8b8f-b57d10b50515" name="cartDetailsFlow" />
+	</flow>
+	<flow name="post:\addToCart:application\json:exp-customerportal-config">
+		<flow-ref doc:name="addToCartFlow" doc:id="6431a2cd-34f3-42e6-a021-babfa147f584" name="addToCartFlow" />
+	</flow>
+	<flow name="put:\modifyCart:application\json:exp-customerportal-config">
+		<flow-ref doc:name="modifyCartFlow" doc:id="eaf96e98-e469-49cb-9b7b-97d5cc58e7e0" name="modifyCartFlow" />
+	</flow>
+	<flow name="post:\payment:application\json:exp-customerportal-config">
+		<flow-ref doc:name="paymentFlow" doc:id="12312b7d-6469-4e99-b03e-8dc4c4ae0e7e" name="paymentFlow"/>
+	</flow>
+	<flow name="get:\fetchCustomerDetails:exp-customerportal-config">
+		<flow-ref doc:name="fetchCustomerFlow" doc:id="2dfbf4aa-af7c-407c-8dd0-ff36fdc69eb2" name="fetchCustomerFlow"/>
+	</flow>
+	<flow name="put:\modifyCustomerDetails:application\json:exp-customerportal-config">
+		<flow-ref doc:name="modifyCustomerFlow" doc:id="c8e28818-5c4f-450a-9aa8-0cc06571cf38" name="modifyCustomerFlow"/>
+	</flow>
+	<flow name="post:\feedback:application\json:exp-customerportal-config">
+		<flow-ref doc:name="feedbackFlow" doc:id="55d7939e-9017-4b3a-8c89-4ab51d5beaea" name="feedbackFlow"/>
+	</flow>
+	<flow name="get:\track_complaint:exp-customerportal-config">
+		<flow-ref doc:name="trackComplaintFlow" doc:id="abc0aa98-c83a-4e2f-b2b8-92e1a4ef2f8d" name="trackComplaintFlow"/>
+	</flow>
+	<flow name="post:\addComplaint:application\json:exp-customerportal-config">
+		<flow-ref doc:name="addComplaintFlow" doc:id="3fc049bf-f6c5-4788-a631-b55c5b4a2498" name="addComplaintFlow"/>
+	</flow>
+	<flow
+		name="put:\close_complaint:application\json:exp-customerportal-config">
+		<flow-ref doc:name="closeComplaintFlow" doc:id="f9d2ef00-c8ef-4b37-bf24-7c25abe95e4e" name="closeComplaintFlow" />
+	</flow>
+	<flow name="put:\orderDelivered:exp-customerportal-config">
+		<flow-ref doc:name="orderDeliveredFlow" doc:id="327f0f8a-e2d1-4b14-9ad7-1fb4215023d9" name="orderDeliveredFlow"/>
+	</flow>
+	<flow name="put:\addProductQuantity:application\json:exp-customerportal-config">
+        <flow-ref doc:name="Flow Reference" doc:id="e552ed29-bb39-4da5-854c-edfb3bb6fc34" name="updateProductQuantityFlow"/>
+    </flow>
+	<flow name="put:\orderCancelled:exp-customerportal-config">
+		<flow-ref doc:name="orderCancelledFlow" doc:id="03f142dc-dcd1-4a2e-9e36-f2623c5ddbca" name="orderCancelledFlow" />
+	</flow>
+</mule>
