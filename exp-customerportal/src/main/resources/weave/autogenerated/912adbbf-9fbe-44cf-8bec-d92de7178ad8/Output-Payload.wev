@@ -1,0 +1,10 @@
+%dw 2.0
+
+type auto_912adbbf_9fbe_44cf_8bec_d92de7178ad8_Output_Payload = {
+  customerEmailId?: String, 
+  Cart_Total_Amount: Number, 
+  customerId?: String, 
+  Items: { _?: Any }, 
+  _?: Any
+}
+

@@ -1,0 +1,242 @@
+#%RAML 1.0
+
+title: exp-customerPortal
+version: v1.0.0
+protocols:
+  - HTTPS
+
+mediaType: 
+- application/json
+
+description: Experience API for get product details and add products in cart, get cart details , modify items cart details, payments, complaints and feedback. It also enables user to get his/her details and modify his/her details.
+
+uses:
+  customerPortalResourceType: library/CustomerPortalResourceType.raml
+
+traits:
+  client-id-enforcement: !include traits/client-id-enforcement.raml
+  CustomerIdQuery: !include traits/customerQueryParams.raml
+  productTitleQueryParam: !include traits/productTitleQueryParameters.raml
+  productDetailsQueryParam: !include traits/productDetailsTrait.raml
+  cartQueryParam: !include traits/cartQueryParam.raml
+  trackComplaintQueryParam: !include traits/trackComplaintQueryParam.raml
+  closeComplaintQueryParam: !include traits/closeComplaintQueryParam.raml
+  orderStatusQueryParam: !include traits/orderStatusQueryParam.raml
+  productQuantityQueryParam: !include traits/productQuantityQueryParam.raml
+
+securitySchemes:
+  oauth_2_0:
+    description: |
+      This API supports OAuth 2.0 for authenticating all API requests.
+    type: OAuth 2.0
+    describedBy:
+      headers:
+        authorization:
+          description: |
+             Used to send a valid OAuth 2 access token. Do not use with the "access_token" query
+             string parameter.
+          type: string
+      queryParameters:
+        access_token:
+          description: |
+             Used to send a valid OAuth 2 access token. Do not use together with the "Authorization"
+             header
+          type: string
+      responses:
+        400:
+          description: Invalid token.
+        401:
+          description: |
+            Unauthorized or Connection error when connecting to the authorization server.
+        403:
+          description: |
+            Forbidden, invalid client application credentials.
+        500:
+          description: |
+            Bad response from authorization server, or WSDL SOAP Fault error.
+    settings:
+      authorizationUri: INSERT_OAUTH2_AUTHORIZATION_URI
+      accessTokenUri: https://o-auth-implementation-ujfehj.5sc6y6-1.usa-e2.cloudhub.io/token
+      authorizationGrants: [client_credentials]
+
+
+/productDetails:
+  description: Use to fetche product details
+  securedBy: [oauth_2_0]
+  get: 
+    description: It is uesed to fetche all products
+  /{productTitle}:
+    description: Use to fetche details of a particular product
+    securedBy: [oauth_2_0]
+    get:
+      responses:
+        200:
+          body:
+            application/json:
+              example: !include example/specificProductDetailsResponseExample.json
+
+  type:
+    customerPortalResourceType.request-type:
+      getResponseType: !include dataType/productDataType.raml
+      getResponseExample: !include example/productDetailsResponseExample.json
+
+/addToCart:
+    description: Used to add new Items in cart
+    securedBy: [oauth_2_0]
+    post:
+    type:
+      customerPortalResourceType.request-type:
+        methodDescription: Used to find product price, availability and add the available products in carts
+        postType: !include dataType/addToCartDataType.raml
+        postExample: !include example/addToCartExample.json
+        postResponseType: !include dataType/addToCartResponseDataType.raml
+        postResponseExample: !include example/addToCartResponse.json
+
+/cartDetails:
+  description: Used to get cart details of specific customer
+  securedBy: [oauth_2_0]
+  get:
+    description: Used to Fetch Items present in the cart of specific customer
+    is: [cartQueryParam]
+  type:
+      customerPortalResourceType.request-type:
+        getResponseType: !include dataType/cartDetailsDataType.raml
+        getResponseExample: !include example/cartDetailsExample.json
+
+/modifyCart:
+  description: Used to Modify items in cart
+  securedBy: [oauth_2_0]
+  put:
+    description: Used to add or remove product quantity from carts
+  type:
+    customerPortalResourceType.request-type:
+      putType: !include dataType/modifyCartDataType.raml
+      putRequestExample: !include example/modifyCartRequestExample.json 
+      putResponse: !include example/modifyCartResponseExample.json
+
+/payment:
+    description: Used to confirm the payment and modify the product database
+    securedBy: [oauth_2_0]
+    post:
+    type:
+      customerPortalResourceType.request-type:
+        methodDescription: Used to confirm the payment and modify the database
+        postType: !include dataType/paymentDataType.raml
+        postExample: !include example/paymentRequestExample.json
+        postResponseType: !include dataType/paymentResponseDataType.raml
+        postResponseExample: !include example/paymentResponseExample.json
+
+
+/feedback:
+    description: Used to add feedback about a specific product
+    securedBy: [oauth_2_0]
+    post:
+    type:
+      customerPortalResourceType.request-type:
+        methodDescription: Used to add feedback about a specific product
+        postType: !include dataType/feedbackDataType.raml
+        postExample: !include example/feedbackRequestExample.json
+        postResponseType: object
+        postResponseExample: !include example/feedbackResponseExample.json
+
+/fetchCustomerDetails:
+  description: Used to fetch customer Details
+  securedBy: [oauth_2_0]
+  get:
+    is: [CustomerIdQuery]
+  type:
+      customerPortalResourceType.request-type:
+        methodDescription: used to fetch customer details
+        getResponseExample: !include example/fetchCustomerExample.json  
+        getResponseType: !include dataType/fetchCustomerDataType.raml
+        
+/modifyCustomerDetails:
+  description: Used to Update customer Details
+  securedBy: [oauth_2_0]
+  put:
+    is: [CustomerIdQuery]
+  type:
+      customerPortalResourceType.request-type:
+        methodDescription: used to fetch customer details
+        putType: !include dataType/customerPutDataType.raml
+        putResponse: !include example/modifyCustomerPutResponseExample.json
+        putRequestExample: !include example/modifyCustomerPutRequestExample.json
+        
+/orderDelivered:
+  securedBy: [oauth_2_0]
+  put:
+    description: used to update status of Order to delivered
+    is: [orderStatusQueryParam]
+  type:
+      customerPortalResourceType.orderStatus-type:
+        putResponse: !include example/orderDeliveredResponse.json
+
+/orderCancelled:
+  securedBy: [oauth_2_0]
+  put:
+    description: used to update status of Order to cancelled
+    is: [orderStatusQueryParam]
+  type:
+      customerPortalResourceType.orderStatus-type:
+        putResponse: !include example/orderCancelledResponse.json
+
+/addComplaint:
+
+  description: Used to add complaint
+  securedBy: [oauth_2_0]
+  post:
+  type:
+    customerPortalResourceType.request-type:
+        methodDescription: Used to add complaint
+        postType: !include dataType/addComplaintDataType.raml
+        postExample: !include example/addComplaintRequestExample.json
+        postResponseType: object
+        postResponseExample: !include example/addComplaintResponseExample.json
+
+
+/track_complaint:
+
+  description: Used to track complaint using complaintId
+  securedBy: [oauth_2_0]
+  get:
+    is: [trackComplaintQueryParam]
+  type:
+      customerPortalResourceType.request-type:
+        methodDescription: used to fetch complaint details
+        getResponseType: !include dataType/trackComplaintDataType.raml
+        getResponseExample: !include example/trackComplaintResponseExample.json  
+        
+
+/close_complaint:
+
+  description: Used to close complaint
+  securedBy: [oauth_2_0]
+
+  put:
+    is: [closeComplaintQueryParam]
+  type:
+      customerPortalResourceType.request-type:
+        methodDescription: used to close complaint
+        putType: !include dataType/closeComplaintDataType.raml
+        putResponse: !include example/closeComplaintResponse.json
+        putRequestExample: !include example/closeComplaintRequest.json
+
+/addProductQuantity:
+  description: Used to add product quantity
+  securedBy: [oauth_2_0]
+  put:
+    is: [productQuantityQueryParam]
+  type:
+      customerPortalResourceType.request-type:
+        methodDescription: used to close complaint
+        putType: !include dataType/productQuantityDataType.raml
+        putResponse: !include example/productQuantityResponse.raml
+        putRequestExample: !include example/productQuantity.raml
+
+/ping:
+  description: To check the status of Api 
+  get:
+  type:
+    customerPortalResourceType.request-type:
+      getResponseType: !include dataType/healthCheck.raml
+      getResponseExample: !include example/healthCheck.raml       

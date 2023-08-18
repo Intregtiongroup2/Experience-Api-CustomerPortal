@@ -1,0 +1,30 @@
+{
+  "headers": {
+    "client_id": "0747d9c2cdba4796b285b7f0304b4d90",
+    "client_secret": "d021f7140a6746A1Bb5435fB8BB38198",
+    "authorization": "Bearer vJ1tOmkx67rrO4Flh9DKIvbr0HEVmuqGmBIGiNtc4Ru2ZMRCMSBZagelRaKm_YOqWPuNZeM569ozyahU6fGO4g",
+    "user-agent": "PostmanRuntime/7.32.3",
+    "accept": "*/*",
+    "cache-control": "no-cache",
+    "postman-token": "88916d8f-dd57-4ca5-9400-d231216af4cb",
+    "host": "localhost:8082",
+    "accept-encoding": "gzip, deflate, br",
+    "connection": "keep-alive"
+  },
+  "clientCertificate": null,
+  "method": "GET",
+  "scheme": "https",
+  "queryParams": {},
+  "requestUri": "/api/productDetails",
+  "queryString": "",
+  "version": "HTTP/1.1",
+  "maskedRequestPath": "/productDetails",
+  "listenerPath": "/api/*",
+  "relativePath": "/api/productDetails",
+  "localAddress": "/127.0.0.1:8082",
+  "uriParams": {},
+  "rawRequestUri": "/api/productDetails",
+  "rawRequestPath": "/api/productDetails",
+  "remoteAddress": "/127.0.0.1:59758",
+  "requestPath": "/api/productDetails"
+}

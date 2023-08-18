@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<flow name="updateProductQuantityFlow" doc:id="f86a9d65-5fc5-4131-8ca3-ba5e5af2288e" >
+		<http:request method="GET" doc:name="Fetch All Products" doc:id="38f64e50-84b5-4abd-ab70-da5f84aa5a19" config-ref="HTTP_Request_configuration_pro_customerPortal" path="/productDetails" target="products">
+			<http:headers><![CDATA[#[output application/java
+---
+{
+	client_id:p('secure::pro_cp.client_id'),
+	client_secret:p('secure::pro_cp.client_secret')
+}]]]></http:headers>
+		</http:request>
+		<choice doc:name="Checking Given ProductTtile is Correct or Not?" doc:id="9fa5a7ca-f915-4406-aaad-01ea9f804cee">
+				<when expression="#[vars.products.Product_Title contains attributes.queryParams.productTitle]">
+					<logger level="INFO" doc:name="Correct Product" doc:id="c5217b4d-8257-4830-926f-ef44a1d6150b" message="ProductName is Correct" />
+				</when>
+				<otherwise>
+					<raise-error doc:name="ERR:WRONG_PRODUCT_TITLE" doc:id="7b88f1ae-bdda-4443-a95f-681ed1c78f69" type="ERR:WRONG_PRODUCT_TITLE" description="Please Provide Correct ProductTitle" />
+				</otherwise>
+			</choice>
+		<http:request method="PUT" doc:name="Update Quantity" doc:id="4ec64acc-629e-4c85-b103-60f5ffe22fe8" config-ref="HTTP_Request_configuration_pro_customerPortal" path="/addProductQuantity">
+			<http:headers><![CDATA[#[output application/java
+---
+{
+	client_id:p('secure::pro_cp.client_id'),
+	client_secret:p('secure::pro_cp.client_secret')
+}]]]></http:headers>
+			<http:query-params><![CDATA[#[{
+	productTitle: attributes.queryParams.productTitle,
+	location: attributes.queryParams.location
+}]]]></http:query-params>
+		</http:request>
+	</flow>
+</mule>

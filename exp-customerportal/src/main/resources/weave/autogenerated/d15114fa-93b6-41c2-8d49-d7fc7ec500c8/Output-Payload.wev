@@ -1,0 +1,8 @@
+%dw 2.0
+
+type auto_d15114fa_93b6_41c2_8d49_d7fc7ec500c8_Output_Payload = {
+  "Items_Added_In the Cart": { _?: Any }, 
+  message: String, 
+  _?: Any
+}
+

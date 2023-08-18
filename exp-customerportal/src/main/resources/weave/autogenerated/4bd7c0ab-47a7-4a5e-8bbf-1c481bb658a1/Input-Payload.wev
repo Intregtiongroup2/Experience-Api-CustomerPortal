@@ -1,0 +1,17 @@
+%dw 2.0
+
+type auto_4bd7c0ab_47a7_4a5e_8bbf_1c481bb658a1_Input_Payload = {
+  feedback: {
+    productTitle: String, 
+    Overall: String, 
+    description: String, 
+    Camera: String, 
+    Performance: String, 
+    Display: String, 
+    _?: Any
+  }, 
+  orderId: String, 
+  customerId: String, 
+  _?: Any
+}
+

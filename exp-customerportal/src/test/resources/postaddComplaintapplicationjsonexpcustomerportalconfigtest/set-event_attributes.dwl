@@ -1,0 +1,32 @@
+{
+  "headers": {
+    "client_id": "0747d9c2cdba4796b285b7f0304b4d90",
+    "client_secret": "d021f7140a6746A1Bb5435fB8BB38198",
+    "content-type": "application/json",
+    "authorization": "Bearer AXnVgIYLhliJEuLOmvJ7Xa6XEIbE4t5U713MhV4YEObPL97YptUWbx91eR0BNCqTTy9VpVpI3orzHcwLm7JstA",
+    "user-agent": "PostmanRuntime/7.32.3",
+    "accept": "*/*",
+    "cache-control": "no-cache",
+    "postman-token": "3d47447b-70ce-44f3-b83f-a495846a768d",
+    "host": "localhost:8082",
+    "accept-encoding": "gzip, deflate, br",
+    "connection": "keep-alive",
+    "content-length": "191"
+  },
+  "clientCertificate": null,
+  "method": "POST",
+  "scheme": "https",
+  "queryParams": {},
+  "requestUri": "/api/addComplaint",
+  "queryString": "",
+  "version": "HTTP/1.1",
+  "maskedRequestPath": "/addComplaint",
+  "listenerPath": "/api/*",
+  "relativePath": "/api/addComplaint",
+  "localAddress": "/127.0.0.1:8082",
+  "uriParams": {},
+  "rawRequestUri": "/api/addComplaint",
+  "rawRequestPath": "/api/addComplaint",
+  "remoteAddress": "/127.0.0.1:62437",
+  "requestPath": "/api/addComplaint"
+}

@@ -1,0 +1,32 @@
+{
+  "headers": {
+    "client_id": "6594903a87af44d980d2421f5c3a24d8",
+    "client_secret": "6a39DAdba8514e1D9b48B75Da1D55Ae2",
+    "content-type": "application/json",
+    "authorization": "Bearer S2-0uqmvTvByiWUuBIBQpKzhnbV7GtK54PMMv0aazqlIw6E06K8QEmnTtUU-lIVRgw-qngDgslztDsr7RQsNfg",
+    "user-agent": "PostmanRuntime/7.32.3",
+    "accept": "*/*",
+    "cache-control": "no-cache",
+    "postman-token": "3eee000a-fc71-43d5-acde-4653da40e2f5",
+    "host": "localhost:8082",
+    "accept-encoding": "gzip, deflate, br",
+    "connection": "keep-alive",
+    "content-length": "300"
+  },
+  "clientCertificate": null,
+  "method": "POST",
+  "scheme": "https",
+  "queryParams": {},
+  "requestUri": "/api/feedback",
+  "queryString": "",
+  "version": "HTTP/1.1",
+  "maskedRequestPath": "/feedback",
+  "listenerPath": "/api/*",
+  "relativePath": "/api/feedback",
+  "localAddress": "/127.0.0.1:8082",
+  "uriParams": {},
+  "rawRequestUri": "/api/feedback",
+  "rawRequestPath": "/api/feedback",
+  "remoteAddress": "/127.0.0.1:57831",
+  "requestPath": "/api/feedback"
+}

@@ -1,0 +1,8 @@
+https:
+  port: "8082"
+  readTimeout: "30000"
+tls:
+  keyStoreType: "JKS"
+  keyPath: "keystore.jks"
+  alias: "mule"
+  

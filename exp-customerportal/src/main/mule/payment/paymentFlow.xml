@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:crypto="http://www.mulesoft.org/schema/mule/crypto" xmlns:validation="http://www.mulesoft.org/schema/mule/validation"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd
+http://www.mulesoft.org/schema/mule/crypto http://www.mulesoft.org/schema/mule/crypto/current/mule-crypto.xsd">
+	
+	<flow name="paymentFlow" doc:id="b9dd2e8f-e841-4936-ad81-549963297eb0" >
+		<ee:transform doc:name="Incoming payload" doc:id="0eb53044-a8c3-41ba-a12f-4d30c4b0bf14" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="customerDetails" ><![CDATA[%dw 2.0
+output application/json
+---
+payload.customerDetails]]></ee:set-variable>
+				<ee:set-variable variableName="paymentDetails" ><![CDATA[%dw 2.0
+output application/java
+---
+payload.paymentDetails]]></ee:set-variable>
+				<ee:set-variable variableName="productId" ><![CDATA[%dw 2.0
+output application/json
+---
+payload.productId]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<choice doc:name="Existing user or new " doc:id="7ccce0ac-a94a-46c2-9ec7-d92a3aae6455" >
+			<when expression="#[!isEmpty(payload.customerDetails.customerId)]" >
+				<try doc:name="Try" doc:id="0cf86ed1-db6b-40e8-a6e3-e079647d7fe0" >
+					<http:request method="GET" doc:name="Retrieve Existing Customer Details" doc:id="7a77f7a5-5760-448f-8506-37d87b195564" config-ref="HTTP_Request_configuration_pro_customerPortal" path="/fetchCustomerDetails">
+						<http:headers ><![CDATA[#[output application/java
+---
+{
+	client_id:p('secure::pro_cp.client_id'),
+	client_secret:p('secure::pro_cp.client_secret')
+}]]]></http:headers>
+						<http:query-params ><![CDATA[#[{
+	customerId: vars.customerDetails.customerId
+}]]]></http:query-params>
+					</http:request>
+					<error-handler >
+						<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="070ec871-b9fb-4ffe-b2cf-843e4a43eef6" >
+							<ee:transform doc:name="Error Response" doc:id="11b573a5-d789-49df-afbb-f5e20f9db80c" >
+								<ee:message >
+									<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+error.muleMessage.payload]]></ee:set-payload>
+								</ee:message>
+								<ee:variables >
+									<ee:set-variable variableName="httpStatus" ><![CDATA[error.muleMessage.typedAttributes.statusCode]]></ee:set-variable>
+								</ee:variables>
+							</ee:transform>
+						</on-error-propagate>
+					</error-handler>
+				</try>
+				<ee:transform doc:name="Existing user payment Details" doc:id="c8a5d66f-77f2-4c44-8280-762e6324e2ff" >
+					<ee:message />
+					<ee:variables >
+						<ee:set-variable variableName="location" ><![CDATA[%dw 2.0
+output application/json
+---
+payload.location]]></ee:set-variable>
+						<ee:set-variable variableName="paymentDetails" ><![CDATA[%dw 2.0
+output application/json
+---
+if ( !isEmpty(vars.paymentDetails.cardId) ) {
+	(((payload.Saved_CardDetails) filterObject ((value, key, index) -> key as String==vars.paymentDetails.cardId as String)) mapObject $),
+	"cvvNumber": vars.paymentDetails.cvvNumber,
+	"total_Amount": vars.paymentDetails.total_Amount,
+	"cardId": vars.paymentDetails.cardId,
+	"paymentMode": vars.paymentDetails.paymentMode
+}
+else if(payload.Saved_CardDetails..cardNumber contains  vars.paymentDetails.cardNumber){
+	"cvvNumber": vars.paymentDetails.cvvNumber,
+	"cardNumber": vars.paymentDetails.cardNumber,
+	"total_Amount": vars.paymentDetails.total_Amount,
+    ((payload.Saved_CardDetails filterObject ((value, key, index) -> value.cardNumber == vars.paymentDetails.cardNumber)) mapObject ((value, key, index) -> cardId:(key) as Number)),	
+    "paymentMode": vars.paymentDetails.paymentMode
+}
+else{
+	(vars.paymentDetails)
+}]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</when>
+			<when expression="#[(!isEmpty(vars.customerDetails.emailId) and !isEmpty(vars.customerDetails.firstName) and !isEmpty(vars.customerDetails.lastName) and !isEmpty(vars.customerDetails.address) and !isEmpty(vars.customerDetails.phoneNumber) and isEmpty(vars.customerDetails.customerId))]">
+				<validation:is-email doc:name="Is email valid" doc:id="0a3cee5f-1f96-4013-b834-f172ede3e1e9" config-ref="Validation_Config" email="#[vars.customerDetails.emailId]" message='#["Email-Id  is not valid, Please Provide correct email-id"]'>
+					<error-mapping sourceType="VALIDATION:INVALID_EMAIL" targetType="ERR:INVALID_EMAIL" />
+				</validation:is-email>
+				<ee:transform doc:name="Transform Message" doc:id="3a868983-f046-4bb3-897a-09d031c391f6">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"email":vars.customerDetails.emailId
+}
+]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<flow-ref doc:name="fetchAllCustomers" doc:id="32f9d369-840c-42f7-b0e4-862b49bd5c1e" name="fetchAllCustomers" />
+				<validation:matches-regex doc:name="Is firstName valid" doc:id="05ae7c13-11f7-4359-8c3f-d0e6294ab0ed" config-ref="Validation_Config" value="#[vars.customerDetails.firstName]" regex='#["^[a-zA-Z]*"]' message='#["firstName is not valid, Please Provide correct firstName"]'>
+					<error-mapping sourceType="VALIDATION:MISMATCH" targetType="ERR:INVALID_FNAME" />
+				</validation:matches-regex>
+				<validation:matches-regex doc:name="Is lastName valid" doc:id="efbf6b07-770f-4a95-b70f-938a9c1d7a39" config-ref="Validation_Config" value="#[vars.customerDetails.lastName]" regex='#["^[a-zA-Z]*"]' message='#["lastName is not valid, Please Provide correct lastName"]'>
+					<error-mapping sourceType="VALIDATION:MISMATCH" targetType="ERR:INVALID_LNAME" />
+				</validation:matches-regex>
+				<validation:matches-regex doc:name="Is phoneNumber valid" doc:id="a95d2a6f-eb25-4f38-8941-174fca1cdd38" config-ref="Validation_Config" value="#[vars.customerDetails.phoneNumber]" regex='#["^[0-9]*"]' message='#["phoneNumber is not valid, Please Provide correct phoneNumber"]'>
+					<error-mapping sourceType="VALIDATION:MISMATCH" targetType="ERR:INVALID_NUMBER" />
+				</validation:matches-regex>
+				<validation:is-true doc:name="Is phoneNumber correct" doc:id="b56e76e9-7bac-4643-bd24-2a2edce950f7" expression="#[sizeOf(vars.customerDetails.phoneNumber) ==10]" message='#["phoneNumber is not valid, Please Provide correct phoneNumber"]'>
+					<error-mapping sourceType="VALIDATION:INVALID_BOOLEAN" targetType="ERR:INVALID_NUMBER" />
+				</validation:is-true>
+				<validation:matches-regex doc:name="Is pincode valid" doc:id="6181e232-dfcc-4937-a099-9690a041dc95" config-ref="Validation_Config" value="#[vars.customerDetails.pincode]" regex='#["^[0-9]*"]' message='#["pincode is not valid, Please Provide correct pincode"]'>
+					<error-mapping sourceType="VALIDATION:MISMATCH" targetType="ERR:INVALID_NUMBER" />
+				</validation:matches-regex>
+				<ee:transform doc:name="Extra fields present" doc:id="1c6a3cae-d923-4ac7-b866-b5bd320860c5">
+					<ee:message>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="extrafields" ><![CDATA[%dw 2.0
+output application/json
+---
+(keysOf(vars.customerDetails)) -"firstName" as Key-"lastName" as Key -"phoneNumber" as Key-"gender" as Key-"address" as Key-"pincode" as Key-"location" as Key-"emailId" as Key]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+				<validation:is-true doc:name="Is true" doc:id="4ec85f26-d290-4595-b099-b9ce070c690a" config-ref="Validation_Config" expression="#[sizeOf(vars.extrafields)==0]" message="extra fields present which are not allowed">
+					<error-mapping sourceType="VALIDATION:INVALID_BOOLEAN" targetType="ERR:FIELDS_NOT_ALLOWED" />
+				</validation:is-true>
+				<ee:transform doc:name="New User" doc:id="5bad21f8-0756-4e62-9243-11fa8fe7eaf7">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+vars.customerDetails]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise>
+				<raise-error doc:name="ERR:PAYMENT_FAILED" doc:id="835a10e8-13c8-41f5-8cd3-029107b7e22d" type="ERR:PAYMENT_FAILED" description="Customer details not valid"/>
+			</otherwise>
+		</choice>
+		<choice doc:name="Payment Mode" doc:id="c509976b-2c62-47c0-b122-c705e6e31861">
+			<when expression='#[vars.paymentDetails.paymentMode == "card"]'>
+				<validation:matches-regex doc:name="Is cvv valid pattern" doc:id="363e30ad-55b6-490a-bc49-d8cefd9640ac" config-ref="Validation_Config" value="#[vars.paymentDetails.cvvNumber]" regex='#["^[0-9]*"]' message='#["cvv is not valid, Please Provide correct cvv"]'>
+					<error-mapping sourceType="VALIDATION:MISMATCH" targetType="ERR:INVALID_CARD_DETAILS" />
+				</validation:matches-regex>
+				<validation:is-number numberType="INTEGER" doc:id="ed4da8dd-6d3c-405a-8b17-8e90a249197b" value="#[vars.paymentDetails.cvvNumber as Number]" doc:name="Is cvv valid" />
+				<validation:matches-regex doc:name="Is card Number valid pattern" doc:id="15c9e468-458d-4fa0-a388-e30a79efcaf8" config-ref="Validation_Config" value="#[vars.paymentDetails.cardNumber]" regex='#["^[0-9]*"]' message='#["cardNumber is not valid, Please Provide correct cardNumber"]'>
+					<error-mapping sourceType="VALIDATION:MISMATCH" targetType="ERR:INVALID_CARD_DETAILS" />
+				</validation:matches-regex>
+				<validation:is-number numberType="LONG" doc:id="a6e5502d-60b4-4e13-a3a3-7720a49a71f6" value="#[vars.paymentDetails.cardNumber as Number]" doc:name="Is card details valid" />
+				<ee:transform doc:name="Card Payment" doc:id="029e6751-8464-4ccd-8322-f3fde573ee18">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"paymentDetailsValid": true
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<when expression='#[vars.paymentDetails.paymentMode == "cash"]'>
+				<ee:transform doc:name="Cash Payment" doc:id="c6050918-1eef-4bc7-b8b0-2cce2cfe6671">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"paymentDetailsValid": true
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise>
+				<raise-error doc:name="ERR:PAYMENT_FAILED" doc:id="49b2b5d6-7913-4422-a207-16c678e4a7e2" type="ERR:PAYMENT_FAILED" description="Payment Mode not supported" />
+			</otherwise>
+		</choice>
+		<try doc:name="Try" doc:id="62188fe4-7f2f-4ccc-9f5a-e6dda2947bb0">
+			<http:request method="GET" doc:name="Retrieve Cart Details for the User" doc:id="b543ab85-a705-44e6-b623-06628ccf1280" config-ref="HTTP_Request_configuration_pro_customerPortal" path="/pro-cartDetails" target="cartDetails">
+				<http:headers><![CDATA[#[output application/java
+---
+{
+	client_id:p('secure::pro_cp.client_id'),
+	client_secret:p('secure::pro_cp.client_secret')
+}]]]></http:headers>
+				<http:query-params><![CDATA[#[output application/java
+---
+if(!isEmpty(vars.customerDetails.customerId))
+{
+	customerId: vars.customerDetails.customerId
+}
+else
+{
+	emailId: vars.customerDetails.emailId
+}]]]></http:query-params>
+			</http:request>
+			<error-handler>
+				<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="9f6f98e9-c9f5-47d8-a502-99ebeda9f804">
+					<ee:transform doc:name="Error Response" doc:id="b2453491-18a8-42b0-9dc6-6771a96e9294">
+						<ee:message>
+							<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+error.muleMessage.payload]]></ee:set-payload>
+						</ee:message>
+						<ee:variables>
+							<ee:set-variable variableName="httpStatus"><![CDATA[error.muleMessage.typedAttributes.statusCode]]></ee:set-variable>
+						</ee:variables>
+					</ee:transform>
+				</on-error-propagate>
+			</error-handler>
+		</try>
+		<ee:transform doc:name="filtering the ProductDetails" doc:id="c8eff1d4-27ae-40a3-af7f-7c734329d2f9">
+					<ee:message />
+					<ee:variables>
+						<ee:set-variable variableName="purchasedProduct"><![CDATA[%dw 2.0
+output application/json
+---
+if(!isEmpty(vars.productId)){
+	(vars.cartDetails.Items filterObject ((value, key, index) -> (vars.productId contains((key) as Number))))
+	}
+else{
+	(vars.cartDetails.Items)
+}]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+		<choice doc:name="Is ProductId Correct?" doc:id="3367a5d8-ec70-4a34-bdb0-8622f38afd53">
+			<when expression="#[sizeOf(vars.purchasedProduct)&gt;0]">
+				<ee:transform doc:name="ProductDetails" doc:id="1ef236f7-efc9-44b0-a585-96a9075822d0">
+					<ee:message />
+					<ee:variables>
+						<ee:set-variable variableName="purchasedProduct"><![CDATA[%dw 2.0
+output application/json
+---
+if(!isEmpty(vars.productId)){
+	(vars.cartDetails.Items filterObject ((value, key, index) -> (vars.productId contains((key) as Number))))
+	}
+else{
+	(vars.cartDetails.Items)
+}]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</when>
+			<otherwise>
+				<raise-error doc:name="ERR:PAYMENT_FAILED" doc:id="c3ffd535-cadc-448e-80df-233a4c334fe6" type="ERR:PAYMENT_FAILED" description="Products are not valid" />
+			</otherwise>
+		</choice>
+		<choice doc:name="Amount is Correct?" doc:id="9d363214-497c-4e67-a036-7113dffc00e8" >
+			<when expression="#[sum(vars.purchasedProduct..Total_Price) == vars.paymentDetails.total_Amount]">
+				<ee:transform doc:name="validated payload" doc:id="6432771c-3d65-4b05-802c-9539d3668038">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"customerDetails": vars.customerDetails,
+	"paymentDetails": vars.paymentDetails,
+	("productId": vars.productId) if(!isEmpty(vars.productId))
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<raise-error doc:name="ERR:PAYMENT_FAILED" doc:id="fb73f6f0-6f9d-418d-8c5a-f119537040b1" type="ERR:PAYMENT_FAILED" description="Payment Failed amount is wrong " />
+			</otherwise>
+		</choice>
+<logger level="INFO" doc:name="Logger" doc:id="c5eae9e8-579c-4417-a0b1-15e018e82412" message='#[("Transaction for customer has started")]' />
+				<http:request method="POST" doc:name="Process payment" doc:id="3d043fac-bb4f-4c01-8938-550555e929e0" config-ref="HTTP_Request_configuration_pro_customerPortal" path="/pro-payment">
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	client_id:p('secure::pro_cp.client_id'),
+	client_secret:p('secure::pro_cp.client_secret')
+}]]]></http:headers>
+		</http:request>
+	</flow>
+</mule>

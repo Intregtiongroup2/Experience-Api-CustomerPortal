@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<error-handler name="globalError_Handler" doc:id="9a9a462d-fe3a-4834-a4e2-849518d64284" >
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="15eacc95-27f9-4326-aead-40ec012d8366" type="ERR:WRONG_PRODUCT_TITLE,ERR:QEURY_PARAM_NOT_FOUND,ERR:CUSTOMER_ID_OR_EMAIL_NOT_PRESENT,ERR:EXISTING_USER,ERR:INVALID_EMAIL,ERR:INVALID_FNAME,ERR:INVALID_LNAME,ERR:INVALID_NUMBER,ERR:FIELDS_NOT_ALLOWED,ERR:FIELDS_NOT_ALLOW,ERR:INVALID_FIELD_PATTERN,ERR:INVALID_CARD_DETAILS">
+			<ee:transform doc:name="Error Response" doc:id="99538fd6-a0a8-4fd9-bf62-0eadb13fa910" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message" : error.description,
+	"errorType": error.errorType.identifier
+}]]></ee:set-payload>
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="httpStatus" ><![CDATA[400]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="913b8c68-727b-4d1f-9023-e348e399c8a2" type="ERR:PAYMENT_FAILED">
+			<ee:transform doc:name="Error Response" doc:id="7b29773e-a2cb-4e2d-947e-857ecb389d94">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message" : "Bad Request "++ error.description,
+	"errorType": error.errorType.identifier
+}]]></ee:set-payload>
+				</ee:message>
+				<ee:variables>
+					<ee:set-variable variableName="httpStatus"><![CDATA[402]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="e88f7fdc-056b-435a-bb05-f2ed5924d17e" >
+			<logger level="INFO" doc:name="Logger" doc:id="b6f843ff-de1b-447e-b2dc-a9c1ffc9d27d" message='#[error.muleMessage.payload]' />
+			<ee:transform doc:name="Error Message" doc:id="fcf24cf6-cbf0-42bc-8d3b-1a3b3591f639">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+error.muleMessage.payload]]></ee:set-payload>
+				</ee:message>
+				<ee:variables>
+					<ee:set-variable variableName="httpStatus"><![CDATA[error.muleMessage.typedAttributes.statusCode]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+		</on-error-propagate>
+	</error-handler>
+</mule>

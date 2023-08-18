@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<flow name="orderCancelledFlow" doc:id="93b9a45d-ff52-4d89-a608-3963649e998c" >
+		<http:request method="PUT" doc:name="Cancel orderStatus " doc:id="84a9d767-71f1-4aae-93d4-43c99720acad" config-ref="HTTP_Request_configuration_pro_customerPortal" path="/pro-orderCancelled">
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	client_id:p('secure::pro_cp.client_id'),
+	client_secret:p('secure::pro_cp.client_secret')
+}]]]></http:headers>
+			<http:query-params ><![CDATA[#[output application/java
+---
+{
+	orderId : attributes.queryParams.orderId
+}]]]></http:query-params>
+		</http:request>
+	</flow>
+</mule>
