@@ -3,17 +3,37 @@ pro_cp:
   protocol: "![IMgZ5Gx+3EaQqSOfM6c/ww==]"
   timeout: "![Aq+pSSkA8ytcO9ulkSdJug==]"
   bufferSize: "![4lZZVwSRhGrpE6ck405pRw==]"
-  client_id: "![mN1xjYoJRrCpmo45GSanHRcPcjFQTF5qtb7KgILvQzCIK+FqCGO+ItN3r3q1Ga/n]"
-  client_secret: "![N7ZXEjZSMCE1NLex9iUyRYqxBKnN8fvSg2y6rKi/knzw46usdKFzsqIRd9QYKbw4]"
+  client_id: "![yWFC9K7rky5Rn04dWFAaK97KlLYbWHEqNpiBaLRNOlZ0mFMCGZG2AZRDuZizJihq]"
+  client_secret: "![kVhnkJdX6Kpea0SgKko9d3d5eAdJjIVmRd+ix8xSKbPowHW1Ve75HJhA4eNoYvkE]"
+  endpoints:
+    addcart: "![QtlPnp90de4kz7mlY1GmWg==]"
+    getcart: "![O84QmEFF5E2IEQlc0QFVgn5OZ1dnH4vymnJgjpqH8cQ=]"
+    modifycart: "![Hn2glg7/lfovpc8vwzJDaQ==]"
+    addcomplaint: "![xDpQJjktmh5ej4dOqJOxItu+Wn1S0PAyZoO4kuqD/KA=]"
+    trackcomplaint: "![G148h9PQyJLDkGGDcSSynWejuzM8NlDYGg9bb+pCWx0=]"
+    closeComplaint: "![wlFMkwA3M00DxB9jCMkYIrqDLdUxAskYzkRFFwflLy0=]"
+    getcustomer: "![OZ84TBs7hvykgfA0kox8fsk1beWjZkE8yLsjo/+6Znw=]"
+    editcustmer: "![vmxp1OKa+uYyDZiBdQ3woavj79g3YQQUHD/eOSAAUzc=]"
+    feedback: "![uFFCIgiu0v2kqME1FOmj6g==]"
+    payment: "![qovX1vV628VMDQwPfkKUqA==]"
+    deliverOrder: "![XzXVNYYwgBbEwqUYY4Mj5llxB/6rvlW7/zciY5xXbVU=]"
+    ordercancel: "![T0xA5qDPAGgh8MdHzWyr1AQk2YlhVz521iKkGzX8vBs=]"
+    products: "![m0zh/bAI187Th1Autjr7sA==]"
+    updatequantity: "![vAyMRhWFyANHZnFtirZiGetmRh8+HohlIZu2IwCbKgQ=]"
   
 loc:
   host: "![nrLAfmwzIuatyk98LrjetCXLoijd+h7L2PczhIPsSmY=]"
   protocol: "![IMgZ5Gx+3EaQqSOfM6c/ww==]"
   timeout: "![Aq+pSSkA8ytcO9ulkSdJug==]"
   bufferSize: "![4lZZVwSRhGrpE6ck405pRw==]"
-  client_id: "![NibqQ7ox49w3p+BsgYvQLZW0RSJvHQfGc4D3VwTgVPlqEkzb06y4gmoHiS2PJVJx]"
-  client_secret: "![hTN4SvVdf4WF8S0g/PqJtbH0z9zmEAAXRrF9ZUXlk5Alb84TgvUSILV6hogfr6mr]"
-    
+  client_id: "![OEbpLhC9+wmlm1Nayz3+q1WLvyPRhqvDGRf8Nc3CLuzPYTOWLRCEtLYM74wDggUA]"
+  client_secret: "![g0z6tc9fsjojr+B015kdei1o/oveloZU3VXKodY07lytG9aHGhIjfxPkpIDporb0]"
+  endpoints:
+    products: "![i3VCjW5RKSdPJe3KTNds4A==]"
+    customers: "![1TfvsI0vDIjGdpoEd1Q76Q==]"
+    ping: "![xOexIv61Ry2Dts+fNsXvXQ==]"
+
+  
 tls:
   keyPass: "![/XsR0czN/d1IcT4ItU+IRA==]"
   pass: "![/XsR0czN/d1IcT4ItU+IRA==]"

@@ -6,7 +6,7 @@
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
 	<flow name="trackComplaintFlow" doc:id="f2eca19d-1a8a-4fd2-842c-c270369880f9" >
-		<http:request method="GET" doc:name="fetch complaintDetails" doc:id="00e9a701-dd0b-4aea-b588-5fc12bd60bc2" config-ref="HTTP_Request_configuration_pro_customerPortal" path="/pro-track_complaint" >
+		<http:request method="GET" doc:name="fetch complaintDetails" doc:id="00e9a701-dd0b-4aea-b588-5fc12bd60bc2" config-ref="HTTP_Request_configuration_pro_customerPortal" path="${secure::pro_cp.endpoints.trackcomplaint}" >
 			<http:headers ><![CDATA[#[output application/java
 ---
 {

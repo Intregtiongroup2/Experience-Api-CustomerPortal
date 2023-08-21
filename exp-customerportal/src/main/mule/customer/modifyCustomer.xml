@@ -47,12 +47,12 @@ else{
 						<ee:set-variable variableName="extraFields" ><![CDATA[%dw 2.0
 output application/json
 ---
-(keysOf(payload)) - "phoneNumber" as Key - "cardDetails" as Key - "address" as Key - "pincode" as Key]]></ee:set-variable>
+(keysOf(payload)) - "phoneNumber" as Key - "address" as Key - "pincode" as Key]]></ee:set-variable>
 					</ee:variables>
 				</ee:transform>
 				<choice doc:name="Choice" doc:id="1ffe008c-f59c-4af2-b597-1aaa7752b381" >
 					<when expression="#[isEmpty(payload.error)]">
-						<validation:is-true doc:name="Is true" doc:id="fa4c571a-8a25-4a58-8f0e-fa1663665acb" config-ref="Validation_Config" expression="#[sizeOf(vars.extraFields)==0]" message="extra fields present which are not allowed Only phoneNumber,address,pincode and new card Details can be modified">
+						<validation:is-true doc:name="Is true" doc:id="fa4c571a-8a25-4a58-8f0e-fa1663665acb" config-ref="Validation_Config" expression="#[sizeOf(vars.extraFields)==0]" message="extra fields present which are not allowed Only phoneNumber,address,pincode can be modified">
 					<error-mapping sourceType="VALIDATION:INVALID_BOOLEAN" targetType="ERR:FIELDS_NOT_ALLOWED" />
 				</validation:is-true>
 					</when>
@@ -60,7 +60,7 @@ output application/json
 						<raise-error doc:name="ERR:INVALID_FIELD_PATTERN" doc:id="63ad79eb-6515-44d8-9165-020da5a634ee" type="ERR:INVALID_FIELD_PATTERN" description="Please provide the required fields in correct pattern"/>
 					</otherwise>
 				</choice>
-				<http:request method="PUT" doc:name="Update Existing Customer Details" doc:id="1ee38eee-5238-48e7-a23e-cf702ec34c2f" config-ref="HTTP_Request_configuration_pro_customerPortal" path="/modifyCustomerDetails">
+				<http:request method="PUT" doc:name="Update Existing Customer Details" doc:id="1ee38eee-5238-48e7-a23e-cf702ec34c2f" config-ref="HTTP_Request_configuration_pro_customerPortal" path="${secure::pro_cp.endpoints.editcustmer}">
 					<http:headers><![CDATA[#[output application/java
 ---
 {

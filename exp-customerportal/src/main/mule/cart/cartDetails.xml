@@ -10,7 +10,7 @@ http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mu
 		<choice doc:name="checking customerId or email present?" doc:id="9b1c0cec-fd75-4b58-8255-4c784c37ae36" >
 			<when expression="#[!isEmpty(attributes.queryParams.customerId) == true]">
 				<try doc:name="Try" doc:id="dd854c71-cdfa-4b2b-900d-9daca7237359" >
-					<http:request method="GET" doc:name="fetch Items from cart based on customerId" doc:id="ad2b1148-d94a-4afc-b10c-18b450f4b4e9" config-ref="HTTP_Request_configuration_pro_customerPortal" path="/pro-cartDetails">
+					<http:request method="GET" doc:name="fetch Items from cart based on customerId" doc:id="ad2b1148-d94a-4afc-b10c-18b450f4b4e9" config-ref="HTTP_Request_configuration_pro_customerPortal" path="${secure::pro_cp.endpoints.getcart}">
 					<http:headers><![CDATA[#[output application/java
 ---
 {
@@ -45,7 +45,7 @@ error.muleMessage.payload]]></ee:set-payload>
 					<error-mapping sourceType="VALIDATION:INVALID_EMAIL" targetType="ERR:INVALID_EMAIL" />
 				</validation:is-email>
 				<try doc:name="Try" doc:id="75fe4802-6baa-45df-9cec-28f4434d8882" >
-					<http:request method="GET" doc:name="fetch Items from cart based on email" doc:id="37eadc9f-cbe5-46c3-8bfb-4faf5e9ebed3" config-ref="HTTP_Request_configuration_pro_customerPortal" path="/pro-cartDetails">
+					<http:request method="GET" doc:name="fetch Items from cart based on email" doc:id="37eadc9f-cbe5-46c3-8bfb-4faf5e9ebed3" config-ref="HTTP_Request_configuration_pro_customerPortal" path="${secure::pro_cp.endpoints.getcart}">
 					<http:headers><![CDATA[#[output application/java
 ---
 {

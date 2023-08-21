@@ -9,7 +9,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 		<choice doc:name="Choice" doc:id="5d4579b7-3e51-4700-9c28-1ec30d8bdaa5" >
 			<when expression="#[isEmpty(attributes.uriParams.productTitle)== true]">
 				<try doc:name="Try" doc:id="6c86730e-8ab5-427f-97e8-affa653cf042">
-			<http:request method="GET" doc:name="Fetch All Products" doc:id="26e2e80d-559d-4c6b-a0bc-dee18b0e77d9" config-ref="HTTP_Request_configuration_pro_customerPortal" path="/productDetails">
+			<http:request method="GET" doc:name="Fetch All Products" doc:id="26e2e80d-559d-4c6b-a0bc-dee18b0e77d9" config-ref="HTTP_Request_configuration_pro_customerPortal" path="${secure::pro_cp.endpoints.products}">
 			<http:headers><![CDATA[#[output application/java
 ---
 {
@@ -36,7 +36,7 @@ error.muleMessage.payload]]></ee:set-payload>
 			</when>
 			<otherwise >
 				<try doc:name="Try" doc:id="2947fcc2-c111-4e60-b10f-5e64c2ac7b61" >
-					<http:request method="GET" doc:name="Fetch Specific Product Details" doc:id="910d2673-9c17-4cf9-9917-5dad2bf62340" config-ref="HTTP_Request_configuration_pro_customerPortal" path="/productDetails" >
+					<http:request method="GET" doc:name="Fetch Specific Product Details" doc:id="910d2673-9c17-4cf9-9917-5dad2bf62340" config-ref="HTTP_Request_configuration_pro_customerPortal" path="${secure::pro_cp.endpoints.products}" >
 						<http:headers ><![CDATA[#[output application/java
 ---
 {

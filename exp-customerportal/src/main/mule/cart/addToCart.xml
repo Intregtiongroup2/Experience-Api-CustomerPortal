@@ -41,7 +41,7 @@ output application/json
 payload]]></ee:set-variable>
 			</ee:variables>
 		</ee:transform>
-		<http:request method="GET" doc:name="Fetch All Products" doc:id="31454825-d384-46e7-bb3f-b22b7f20561d" config-ref="HTTP_Request_configuration_pro_customerPortal" path="/productDetails" target="products">
+		<http:request method="GET" doc:name="Fetch All Products" doc:id="31454825-d384-46e7-bb3f-b22b7f20561d" config-ref="HTTP_Request_configuration_pro_customerPortal" path="${secure::pro_cp.endpoints.products}" target="products">
 			<http:headers ><![CDATA[#[output application/java
 ---
 {
@@ -60,7 +60,7 @@ payload]]></ee:set-variable>
 			</choice>
 		</foreach>
 		<try doc:name="Try" doc:id="ab0cfcfe-ffab-4327-b60e-82cc1564de39" >
-			<http:request method="POST" doc:name="Add Items In cart" doc:id="bacf183d-7e7e-447d-93e6-c93f1a4d6645" config-ref="HTTP_Request_configuration_pro_customerPortal" path="/pro-addToCart">
+			<http:request method="POST" doc:name="Add Items In cart" doc:id="bacf183d-7e7e-447d-93e6-c93f1a4d6645" config-ref="HTTP_Request_configuration_pro_customerPortal" path="${secure::pro_cp.endpoints.addcart}">
 				<http:body><![CDATA[#[vars.addTocartRequest]]]></http:body>
 				<http:headers><![CDATA[#[output application/java
 ---
@@ -97,7 +97,7 @@ payload]]></ee:set-payload>
 	<flow name="fetchAllCustomers" doc:id="1a7dc280-2176-4159-87c1-e6717f973a68" >
 		<set-variable value="#[[]]" doc:name="customers" doc:id="65ebfaf3-7d0e-4733-92e8-fbcb25768ff2" variableName="customers"/>
 		<foreach doc:name="For Each" doc:id="2fcbeccf-4ced-4344-9f28-b3f3c558a307" collection='#[["Kolkata","Bangalore","Hyderabad","Mumbai"]]'>
-			<http:request method="GET" doc:name="Get customers from Local DB" doc:id="2d8d73f5-e529-4c44-8f63-3ad9cc550ace" config-ref="HTTP_Request_configuration_sys_cp_loc" path="customers/{location}">
+			<http:request method="GET" doc:name="Get customers from Local DB" doc:id="2d8d73f5-e529-4c44-8f63-3ad9cc550ace" config-ref="HTTP_Request_configuration_sys_cp_loc" path="${secure::loc.endpoints.customers}/{location}">
 			<http:headers><![CDATA[#[output application/java
 ---
 {

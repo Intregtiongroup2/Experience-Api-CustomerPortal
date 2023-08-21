@@ -29,14 +29,14 @@ http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/m
 	<http:request-config
 		name="HTTP_Request_configuration_pro_customerPortal"
 		doc:name="HTTP Request configuration"
-		doc:id="c82b7e9f-fe5b-4fec-9395-1214b9e7421a" basePath="/api">
+		doc:id="c82b7e9f-fe5b-4fec-9395-1214b9e7421a" basePath="${base.path}">
 		<http:request-connection protocol="${secure::pro_cp.protocol}"
 			host="${secure::pro_cp.host}" connectionIdleTimeout="${secure::pro_cp.timeout}" responseBufferSize="${secure::pro_cp.bufferSize}"/>
 	</http:request-config>
 	<http:request-config
 		name="HTTP_Request_configuration_sys_cp_loc"
 		doc:name="HTTP Request configuration"
-		doc:id="e8a66249-82a7-4f6c-a135-13ec299cc31c" basePath="/api/">
+		doc:id="e8a66249-82a7-4f6c-a135-13ec299cc31c" basePath="${base.path}">
 		<http:request-connection protocol="${secure::loc.protocol}"
 			host="${secure::loc.host}" connectionIdleTimeout="${secure::loc.timeout}" responseBufferSize="${secure::loc.bufferSize}"/>
 	</http:request-config>
@@ -46,5 +46,5 @@ http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/m
 		defaultErrorHandler-ref="globalError_Handler" />
 	<configuration-properties doc:name="Configuration properties" doc:id="fd5bac3f-9a34-4975-b4e3-97b3af43bec3" file="config.yaml" />
 	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="d350b4ab-8cc0-4ca3-bada-0641ae3b6dcf" file="secureConfig.yaml" key="${decryptKey}" />
-	<api-gateway:autodiscovery apiId="18856607" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="e90a9254-8b11-4dd6-9328-43c129eef5e9" flowRef="exp-customerportal-main" />
+	<api-gateway:autodiscovery apiId="${autodiscovery.id}" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="e90a9254-8b11-4dd6-9328-43c129eef5e9" flowRef="exp-customerportal-main" />
 </mule>

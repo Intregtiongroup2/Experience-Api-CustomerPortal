@@ -18,7 +18,7 @@ output application/json
 ---
 payload.customerDetails]]></ee:set-variable>
 				<ee:set-variable variableName="paymentDetails" ><![CDATA[%dw 2.0
-output application/java
+output application/json
 ---
 payload.paymentDetails]]></ee:set-variable>
 				<ee:set-variable variableName="productId" ><![CDATA[%dw 2.0
@@ -30,7 +30,7 @@ payload.productId]]></ee:set-variable>
 		<choice doc:name="Existing user or new " doc:id="7ccce0ac-a94a-46c2-9ec7-d92a3aae6455" >
 			<when expression="#[!isEmpty(payload.customerDetails.customerId)]" >
 				<try doc:name="Try" doc:id="0cf86ed1-db6b-40e8-a6e3-e079647d7fe0" >
-					<http:request method="GET" doc:name="Retrieve Existing Customer Details" doc:id="7a77f7a5-5760-448f-8506-37d87b195564" config-ref="HTTP_Request_configuration_pro_customerPortal" path="/fetchCustomerDetails">
+					<http:request method="GET" doc:name="Retrieve Existing Customer Details" doc:id="7a77f7a5-5760-448f-8506-37d87b195564" config-ref="HTTP_Request_configuration_pro_customerPortal" path="${secure::pro_cp.endpoints.getcustomer}">
 						<http:headers ><![CDATA[#[output application/java
 ---
 {
@@ -57,26 +57,37 @@ error.muleMessage.payload]]></ee:set-payload>
 						</on-error-propagate>
 					</error-handler>
 				</try>
-				<ee:transform doc:name="Existing user payment Details" doc:id="c8a5d66f-77f2-4c44-8280-762e6324e2ff" >
+				<choice doc:name="Card is Present" doc:id="d732a088-8af3-4990-93f8-5c77009ddb22" >
+					<when expression='#[(vars.paymentDetails.paymentMode == "card") and isEmpty(vars.paymentDetails.cardId) and (isEmpty(vars.paymentDetails.cardNumber))]' >
+						<raise-error doc:name="ERR:PAYMENT_FAILED" doc:id="c4403644-9445-4811-b2bb-81f48492bbeb" type="ERR:PAYMENT_FAILED" description="Card Details not provided please provide appropriate details" />
+					</when>
+					<when expression='#[(vars.paymentDetails.paymentMode == "card") and !isEmpty(vars.paymentDetails.cardId) and isEmpty((payload.Saved_CardDetails) filterObject ((value, key, index) -&gt; key as String==vars.paymentDetails.cardId as String))]'>
+						<raise-error doc:name="ERR:PAYMENT_FAILED" doc:id="69dc206b-3895-475b-bb80-116ccbd5191a" type="ERR:PAYMENT_FAILED" description="Card Id isn't available in the database" />
+					</when>
+					<otherwise>
+						<ee:transform doc:name="Existing user payment Details" doc:id="c8a5d66f-77f2-4c44-8280-762e6324e2ff">
 					<ee:message />
-					<ee:variables >
-						<ee:set-variable variableName="location" ><![CDATA[%dw 2.0
+					<ee:variables>
+						<ee:set-variable variableName="location"><![CDATA[%dw 2.0
 output application/json
 ---
 payload.location]]></ee:set-variable>
-						<ee:set-variable variableName="paymentDetails" ><![CDATA[%dw 2.0
+						<ee:set-variable variableName="paymentDetails"><![CDATA[%dw 2.0
 output application/json
 ---
-if ( !isEmpty(vars.paymentDetails.cardId) ) {
-	(((payload.Saved_CardDetails) filterObject ((value, key, index) -> key as String==vars.paymentDetails.cardId as String)) mapObject $),
+if ( !isEmpty(vars.paymentDetails.cardId) and !isEmpty((payload.Saved_CardDetails) filterObject ((value, key, index) -> key as String==vars.paymentDetails.cardId as String))) {
 	"cvvNumber": vars.paymentDetails.cvvNumber,
 	"total_Amount": vars.paymentDetails.total_Amount,
 	"cardId": vars.paymentDetails.cardId,
+	"cardNumber": ((payload.Saved_CardDetails) filterObject ((value, key, index) -> key as String==vars.paymentDetails.cardId as String))..cardNumber[0],
+	"bankName": ((payload.Saved_CardDetails) filterObject ((value, key, index) -> key as String==vars.paymentDetails.cardId as String))..bankName[0],
+	
 	"paymentMode": vars.paymentDetails.paymentMode
 }
 else if(payload.Saved_CardDetails..cardNumber contains  vars.paymentDetails.cardNumber){
 	"cvvNumber": vars.paymentDetails.cvvNumber,
 	"cardNumber": vars.paymentDetails.cardNumber,
+	"bankName": vars.paymentDetails.bankName,
 	"total_Amount": vars.paymentDetails.total_Amount,
     ((payload.Saved_CardDetails filterObject ((value, key, index) -> value.cardNumber == vars.paymentDetails.cardNumber)) mapObject ((value, key, index) -> cardId:(key) as Number)),	
     "paymentMode": vars.paymentDetails.paymentMode
@@ -86,6 +97,8 @@ else{
 }]]></ee:set-variable>
 					</ee:variables>
 				</ee:transform>
+					</otherwise>
+				</choice>
 			</when>
 			<when expression="#[(!isEmpty(vars.customerDetails.emailId) and !isEmpty(vars.customerDetails.firstName) and !isEmpty(vars.customerDetails.lastName) and !isEmpty(vars.customerDetails.address) and !isEmpty(vars.customerDetails.phoneNumber) and isEmpty(vars.customerDetails.customerId))]">
 				<validation:is-email doc:name="Is email valid" doc:id="0a3cee5f-1f96-4013-b834-f172ede3e1e9" config-ref="Validation_Config" email="#[vars.customerDetails.emailId]" message='#["Email-Id  is not valid, Please Provide correct email-id"]'>
@@ -146,14 +159,28 @@ vars.customerDetails]]></ee:set-payload>
 		</choice>
 		<choice doc:name="Payment Mode" doc:id="c509976b-2c62-47c0-b122-c705e6e31861">
 			<when expression='#[vars.paymentDetails.paymentMode == "card"]'>
+				<validation:is-not-null doc:name="Is cvv null" doc:id="7ad8ec52-e1c0-436e-9f2f-eb12835f849d" config-ref="Validation_Config" value="#[vars.paymentDetails.cvvNumber]" message=" Please provide an appropriate cvv">
+					<error-mapping sourceType="VALIDATION:NULL" targetType="ERR:PAYMENT_FAILED" />
+				</validation:is-not-null>
+				<validation:is-false doc:name="Is cvv empty" doc:id="b22e6408-2bec-4b41-a132-2af36b948d59" config-ref="Validation_Config" expression="#[isEmpty(vars.paymentDetails.cvvNumber)]" message="Payment Failed cvv is empty">
+					<error-mapping sourceType="VALIDATION:INVALID_BOOLEAN" targetType="ERR:PAYMENT_FAILED" />
+				</validation:is-false>
 				<validation:matches-regex doc:name="Is cvv valid pattern" doc:id="363e30ad-55b6-490a-bc49-d8cefd9640ac" config-ref="Validation_Config" value="#[vars.paymentDetails.cvvNumber]" regex='#["^[0-9]*"]' message='#["cvv is not valid, Please Provide correct cvv"]'>
 					<error-mapping sourceType="VALIDATION:MISMATCH" targetType="ERR:INVALID_CARD_DETAILS" />
 				</validation:matches-regex>
-				<validation:is-number numberType="INTEGER" doc:id="ed4da8dd-6d3c-405a-8b17-8e90a249197b" value="#[vars.paymentDetails.cvvNumber as Number]" doc:name="Is cvv valid" />
+				<validation:is-not-null doc:name="Is not null1" doc:id="9aa0e712-2a88-466d-af5e-6de98057dc33" config-ref="Validation_Config" value="#[vars.paymentDetails.cardNumber]" message=" Please provide an appropriate cardnumber">
+					<error-mapping sourceType="VALIDATION:NULL" targetType="ERR:PAYMENT_FAILED" />
+				</validation:is-not-null>
+				<validation:is-false doc:name="Is cardNumber empty" doc:id="5ae9d2cb-42f0-4cb7-bb26-a9a4dca6d04e" config-ref="Validation_Config" expression="#[isEmpty(vars.paymentDetails.cardNumber)]" message="Payment Failed card number is empty">
+					<error-mapping sourceType="VALIDATION:INVALID_BOOLEAN" targetType="ERR:PAYMENT_FAILED" />
+				</validation:is-false>
 				<validation:matches-regex doc:name="Is card Number valid pattern" doc:id="15c9e468-458d-4fa0-a388-e30a79efcaf8" config-ref="Validation_Config" value="#[vars.paymentDetails.cardNumber]" regex='#["^[0-9]*"]' message='#["cardNumber is not valid, Please Provide correct cardNumber"]'>
 					<error-mapping sourceType="VALIDATION:MISMATCH" targetType="ERR:INVALID_CARD_DETAILS" />
 				</validation:matches-regex>
 				<validation:is-number numberType="LONG" doc:id="a6e5502d-60b4-4e13-a3a3-7720a49a71f6" value="#[vars.paymentDetails.cardNumber as Number]" doc:name="Is card details valid" />
+				<validation:is-true doc:name="Is bankname given" doc:id="37738c54-727d-49e1-8643-68110a84f9ab" config-ref="Validation_Config" expression="#[!isEmpty(vars.paymentDetails.bankName)]" message="BankName not provided">
+					<error-mapping sourceType="VALIDATION:INVALID_BOOLEAN" targetType="ERR:PAYMENT_FAILED" />
+				</validation:is-true>
 				<ee:transform doc:name="Card Payment" doc:id="029e6751-8464-4ccd-8322-f3fde573ee18">
 					<ee:message>
 						<ee:set-payload><![CDATA[%dw 2.0
@@ -182,7 +209,7 @@ output application/json
 			</otherwise>
 		</choice>
 		<try doc:name="Try" doc:id="62188fe4-7f2f-4ccc-9f5a-e6dda2947bb0">
-			<http:request method="GET" doc:name="Retrieve Cart Details for the User" doc:id="b543ab85-a705-44e6-b623-06628ccf1280" config-ref="HTTP_Request_configuration_pro_customerPortal" path="/pro-cartDetails" target="cartDetails">
+			<http:request method="GET" doc:name="Retrieve Cart Details for the User" doc:id="b543ab85-a705-44e6-b623-06628ccf1280" config-ref="HTTP_Request_configuration_pro_customerPortal" path="${secure::pro_cp.endpoints.getcart}" target="cartDetails">
 				<http:headers><![CDATA[#[output application/java
 ---
 {
@@ -248,7 +275,7 @@ else{
 				</ee:transform>
 			</when>
 			<otherwise>
-				<raise-error doc:name="ERR:PAYMENT_FAILED" doc:id="c3ffd535-cadc-448e-80df-233a4c334fe6" type="ERR:PAYMENT_FAILED" description="Products are not valid" />
+				<raise-error doc:name="ERR:PAYMENT_FAILED" doc:id="c3ffd535-cadc-448e-80df-233a4c334fe6" type="ERR:PAYMENT_FAILED" description="either cart is empty or productId given doesn't match  " />
 			</otherwise>
 		</choice>
 		<choice doc:name="Amount is Correct?" doc:id="9d363214-497c-4e67-a036-7113dffc00e8" >
@@ -271,13 +298,30 @@ output application/json
 			</otherwise>
 		</choice>
 <logger level="INFO" doc:name="Logger" doc:id="c5eae9e8-579c-4417-a0b1-15e018e82412" message='#[("Transaction for customer has started")]' />
-				<http:request method="POST" doc:name="Process payment" doc:id="3d043fac-bb4f-4c01-8938-550555e929e0" config-ref="HTTP_Request_configuration_pro_customerPortal" path="/pro-payment">
-			<http:headers ><![CDATA[#[output application/java
+		<try doc:name="Try" doc:id="7eaca5a2-8689-477d-b5c5-1eebda757f1c" >
+			<http:request method="POST" doc:name="Process payment" doc:id="3d043fac-bb4f-4c01-8938-550555e929e0" config-ref="HTTP_Request_configuration_pro_customerPortal" path="${secure::pro_cp.endpoints.payment}">
+			<http:headers><![CDATA[#[output application/java
 ---
 {
 	client_id:p('secure::pro_cp.client_id'),
 	client_secret:p('secure::pro_cp.client_secret')
 }]]]></http:headers>
 		</http:request>
+			<error-handler >
+				<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="92a6a22f-3d12-4899-941a-a3dabbbeab08" >
+					<ee:transform doc:name="Error Response" doc:id="e2928327-7685-4d22-99e0-6642674b4cc3" >
+						<ee:message >
+							<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+error.muleMessage.payload]]></ee:set-payload>
+						</ee:message>
+						<ee:variables >
+							<ee:set-variable variableName="httpStatus" ><![CDATA[error.muleMessage.typedAttributes.statusCode]]></ee:set-variable>
+						</ee:variables>
+					</ee:transform>
+				</on-error-propagate>
+			</error-handler>
+		</try>
 	</flow>
 </mule>

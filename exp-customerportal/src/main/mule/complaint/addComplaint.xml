@@ -6,7 +6,7 @@
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
 	<flow name="addComplaintFlow" doc:id="318ec19f-07b6-4182-a531-029d04fc7aca" >
-		<http:request method="POST" doc:name="add complaintDetails" doc:id="46b33bd3-2276-45d8-ac0e-f3738188ee16" config-ref="HTTP_Request_configuration_pro_customerPortal" path="/pro-addComplaint">
+		<http:request method="POST" doc:name="add complaintDetails" doc:id="46b33bd3-2276-45d8-ac0e-f3738188ee16" config-ref="HTTP_Request_configuration_pro_customerPortal" path="${secure::pro_cp.endpoints.addcomplaint}">
 			<http:body ><![CDATA[#[%dw 2.0
 output application/json
 ---
