@@ -6,7 +6,7 @@
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
 	<flow name="fetchCustomerFlow" doc:id="da0a04d8-30c6-496d-9bff-5a65965320bf" >
-		<http:request method="GET" doc:name="Fetch Customer Details" doc:id="b110225a-1838-4734-9205-380c7c6edab7" config-ref="HTTP_Request_configuration_pro_customerPortal" path="/fetchCustomerDetails">
+		<http:request method="GET" doc:name="Fetch Customer Details" doc:id="b110225a-1838-4734-9205-380c7c6edab7" config-ref="HTTP_Request_configuration_pro_customerPortal" path="${secure::pro_cp.endpoints.getcustomer}">
 			<http:headers ><![CDATA[#[output application/java
 ---
 {

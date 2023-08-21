@@ -5,7 +5,7 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
 	<flow name="updateProductQuantityFlow" doc:id="f86a9d65-5fc5-4131-8ca3-ba5e5af2288e" >
-		<http:request method="GET" doc:name="Fetch All Products" doc:id="38f64e50-84b5-4abd-ab70-da5f84aa5a19" config-ref="HTTP_Request_configuration_pro_customerPortal" path="/productDetails" target="products">
+		<http:request method="GET" doc:name="Fetch All Products" doc:id="38f64e50-84b5-4abd-ab70-da5f84aa5a19" config-ref="HTTP_Request_configuration_pro_customerPortal" path="${secure::pro_cp.endpoints.products}" target="products">
 			<http:headers><![CDATA[#[output application/java
 ---
 {
@@ -21,7 +21,7 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 					<raise-error doc:name="ERR:WRONG_PRODUCT_TITLE" doc:id="7b88f1ae-bdda-4443-a95f-681ed1c78f69" type="ERR:WRONG_PRODUCT_TITLE" description="Please Provide Correct ProductTitle" />
 				</otherwise>
 			</choice>
-		<http:request method="PUT" doc:name="Update Quantity" doc:id="4ec64acc-629e-4c85-b103-60f5ffe22fe8" config-ref="HTTP_Request_configuration_pro_customerPortal" path="/addProductQuantity">
+		<http:request method="PUT" doc:name="Update Quantity" doc:id="4ec64acc-629e-4c85-b103-60f5ffe22fe8" config-ref="HTTP_Request_configuration_pro_customerPortal" path="${secure::pro_cp.endpoints.updatequantity}">
 			<http:headers><![CDATA[#[output application/java
 ---
 {

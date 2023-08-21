@@ -24,7 +24,7 @@ output application/json
 		<validation:is-true doc:name="Is true" doc:id="772bea9e-43d6-4094-8986-5bdf6e7f27f9" config-ref="Validation_Config" expression="#[sizeOf(vars.extraFields) == 0]" message="Extra fields are not allowed only productTitle,display,camera,performance,overall,description and orderId">
 			<error-mapping sourceType="VALIDATION:INVALID_BOOLEAN" targetType="ERR:FIELDS_NOT_ALLOW" />
 		</validation:is-true>
-		<http:request method="POST" doc:name="Add feedback to the database" doc:id="78a6e5bc-881f-4510-8e5a-6be46cb1c7da" config-ref="HTTP_Request_configuration_pro_customerPortal" path="/pro-feedback">
+		<http:request method="POST" doc:name="Add feedback to the database" doc:id="78a6e5bc-881f-4510-8e5a-6be46cb1c7da" config-ref="HTTP_Request_configuration_pro_customerPortal" path="${secure::pro_cp.endpoints.feedback}">
 			<http:headers ><![CDATA[#[output application/java
 ---
 {

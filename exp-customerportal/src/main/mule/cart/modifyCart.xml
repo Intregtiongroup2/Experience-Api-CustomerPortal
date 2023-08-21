@@ -12,7 +12,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 			</when>
 			<otherwise >
 				<try doc:name="Try" doc:id="ca624d31-38fc-4bba-a9a5-75e0bc6a1e96" >
-					<http:request method="PUT" doc:name="Modify Items In cart" doc:id="9a9cf9b9-d0cd-44f0-b360-1fe2ae9aba47" config-ref="HTTP_Request_configuration_pro_customerPortal" path="/pro-modifyCart" >
+					<http:request method="PUT" doc:name="Modify Items In cart" doc:id="9a9cf9b9-d0cd-44f0-b360-1fe2ae9aba47" config-ref="HTTP_Request_configuration_pro_customerPortal" path="${secure::pro_cp.endpoints.modifycart}" >
 						<http:headers ><![CDATA[#[output application/java
 ---
 {

@@ -56,7 +56,7 @@ securitySchemes:
             Bad response from authorization server, or WSDL SOAP Fault error.
     settings:
       authorizationUri: INSERT_OAUTH2_AUTHORIZATION_URI
-      accessTokenUri: https://o-auth-implementation-ujfehj.5sc6y6-1.usa-e2.cloudhub.io/token
+      accessTokenUri: https://o-auth-implementatiom-d5ihmm.5sc6y6-2.usa-e2.cloudhub.io/token
       authorizationGrants: [client_credentials]
 
 
@@ -164,6 +164,7 @@ securitySchemes:
         
 /orderDelivered:
   securedBy: [oauth_2_0]
+  is: [client-id-enforcement]
   put:
     description: used to update status of Order to delivered
     is: [orderStatusQueryParam]
@@ -181,7 +182,6 @@ securitySchemes:
         putResponse: !include example/orderCancelledResponse.json
 
 /addComplaint:
-
   description: Used to add complaint
   securedBy: [oauth_2_0]
   post:
@@ -195,7 +195,6 @@ securitySchemes:
 
 
 /track_complaint:
-
   description: Used to track complaint using complaintId
   securedBy: [oauth_2_0]
   get:
@@ -208,10 +207,9 @@ securitySchemes:
         
 
 /close_complaint:
-
   description: Used to close complaint
   securedBy: [oauth_2_0]
-
+  is: [client-id-enforcement]
   put:
     is: [closeComplaintQueryParam]
   type:
@@ -224,6 +222,7 @@ securitySchemes:
 /addProductQuantity:
   description: Used to add product quantity
   securedBy: [oauth_2_0]
+  is: [client-id-enforcement]
   put:
     is: [productQuantityQueryParam]
   type:

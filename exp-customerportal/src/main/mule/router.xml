@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
     <flow name="exp-customerportal-main" doc:id="af1b144b-31b5-4b7c-81b0-47c904769a85">
-        <http:listener doc:name="Listener" doc:id="937b4c2d-259c-4793-a269-58ba97b17b4f" config-ref="exp-customerportal-httpListenerConfig" path="/api/*">
+        <http:listener doc:name="Listener" doc:id="937b4c2d-259c-4793-a269-58ba97b17b4f" config-ref="exp-customerportal-httpListenerConfig" path="${expcustomerPortal.path}">
             <http:response statusCode="#[vars.httpStatus default 200]">
                 <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
             </http:response>
@@ -93,20 +93,43 @@ output application/json
         </error-handler>
     </flow>
     <flow name="get:\ping:exp-customerportal-config">
+        <try doc:name="Try" doc:id="a1fc4450-2e02-47e4-b29f-334dafbd8319">
+            <http:request method="GET" doc:name="Ping PAPI pro-customerPortal" doc:id="aa8c32c3-0eda-41c3-a619-b146e8368840" config-ref="HTTP_Request_configuration_pro_customerPortal" path="/ping" />
+            <error-handler>
+                <on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="678a0a89-2113-4628-8bec-92887a31047c">
+                    <ee:transform doc:name="Error Message" doc:id="bb76f8f1-1fe2-4c34-9987-0a12121b83a9">
+                        <ee:message>
+                            <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+"pro-customerPortal is currently not active"]]></ee:set-payload>
+                        </ee:message>
+                        <ee:variables>
+                            <ee:set-variable variableName="httpStatus"><![CDATA[error.muleMessage.typedAttributes.statusCode]]></ee:set-variable>
+                        </ee:variables>
+                    </ee:transform>
+                </on-error-continue>
+            </error-handler>
+        </try>
         <ee:transform>
             <ee:message>
                 <ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
 {
-	apiName: "${app.name}",
-	apiVersion: "${api.version}",
-	server: "mule.server",
-	serviceHealth: {
-		serviceType: "exp-customerPortal",
-			status: "UP",
-			message: "Alive" ,
-			
+	"pro-customerPortal-ping": payload,
+	"exp-customerPortal-ping": {
+		module: "${ping.apiName}",
+		projectVersion: "${ping.projectVersion}",
+		apiVersion: "${ping.apiVersion}",
+		env: "${ping.env}",
+		status: "${ping.status}",
+		server: "${ping.server}",
+		serviceHealth: {
+			serviceType: "${ping.serviceType}",
+			status: "${ping.statusMessage}",
+			message: "${ping.message}"
+		}
 	}
 }]]></ee:set-payload>
             </ee:message>
